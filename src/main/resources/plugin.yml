@@ -1,0 +1,6 @@
+name: SynapseAPI
+main: org.itxtech.synapseapi.SynapseAPI
+version: "3.0"
+api: ["1.0.0"]
+load: STARTUP
+author: iTXTech

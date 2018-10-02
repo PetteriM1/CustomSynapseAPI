@@ -1,6 +1,7 @@
 package org.itxtech.synapseapi;
 
-import cn.nukkit.Server;
+import cn.nukkit.command.Command;
+import cn.nukkit.command.CommandSender;
 import cn.nukkit.network.RakNetInterface;
 import cn.nukkit.network.SourceInterface;
 import cn.nukkit.network.protocol.DataPacket;
@@ -118,5 +119,19 @@ public class SynapseAPI extends PluginBase {
 
     public Messenger getMessenger() {
         return messenger;
+    }
+
+    public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
+        if (sender instanceof SynapsePlayer) {
+            SynapsePlayer p = (SynapsePlayer) sender;
+            if (cmd.getName().equalsIgnoreCase("transfer")) {
+                if (args.length > 0) {
+                    p.transferByDescription(args[0]);
+                } else {
+                    p.sendMessage("Usage: /transfer <description>");
+                }
+            }
+        }
+        return true;
     }
 }

@@ -23,5 +23,4 @@ public class SetHealthPacket extends DataPacket {
         this.reset();
         this.putInt(this.health);
     }
-
 }

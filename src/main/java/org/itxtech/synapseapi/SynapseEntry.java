@@ -11,8 +11,6 @@ import cn.nukkit.plugin.Plugin;
 import cn.nukkit.utils.Binary;
 import cn.nukkit.utils.BinaryStream;
 import cn.nukkit.utils.Zlib;
-import co.aikar.timings.Timing;
-import co.aikar.timings.TimingsManager;
 import com.google.gson.Gson;
 import org.itxtech.synapseapi.event.player.SynapsePlayerCreationEvent;
 import org.itxtech.synapseapi.messaging.StandardMessenger;
@@ -30,9 +28,6 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @author boybook
  */
 public class SynapseEntry {
-
-    private final Timing handleDataPacketTiming = TimingsManager.getTiming("SynapseEntry - HandleDataPacket");
-    private final Timing handleRedirectPacketTiming = TimingsManager.getTiming("SynapseEntry - HandleRedirectPacket");
 
     private SynapseAPI synapse;
     private boolean enable;
@@ -109,7 +104,6 @@ public class SynapseEntry {
             pk.type = DisconnectPacket.TYPE_GENERIC;
             pk.message = "§cServer closed";
             this.sendDataPacket(pk);
-            this.getSynapse().getLogger().debug("Synapse client has disconnected from Synapse synapse");
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -306,7 +300,6 @@ public class SynapseEntry {
     private final Queue<RedirectPacketEntry> redirectPacketQueue = new LinkedBlockingQueue<>();
 
     public void handleDataPacket(SynapseDataPacket pk) {
-        this.handleDataPacketTiming.startTiming();
         switch (pk.pid()) {
             case SynapseInfo.DISCONNECT_PACKET:
                 DisconnectPacket disconnectPacket = (DisconnectPacket) pk;
@@ -347,7 +340,6 @@ public class SynapseEntry {
                 if (this.players.containsKey(uuid)) {
                     DataPacket pk0 = this.getSynapse().getPacket(redirectPacket.mcpeBuffer);
                     if (pk0 != null) {
-                        this.handleRedirectPacketTiming.startTiming();
                         if (pk0.pid() == ProtocolInfo.BATCH_PACKET) pk0.setOffset(1);
                         pk0.decode();
                         SynapsePlayer player = this.players.get(uuid);
@@ -358,7 +350,6 @@ public class SynapseEntry {
                         } else {
                             this.redirectPacketQueue.offer(new RedirectPacketEntry(player, pk0));
                         }
-                        this.handleRedirectPacketTiming.stopTiming();
                     }
                 }
                 break;

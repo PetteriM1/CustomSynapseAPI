@@ -128,5 +128,4 @@ public class SynapseEntryPutPacketThread extends Thread {
         if (more < 0) return 100;
         return NukkitMath.round(10f / (double) this.tickUseTime, 3) * 100;
     }
-
 }

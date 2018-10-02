@@ -18,8 +18,6 @@ import cn.nukkit.network.SourceInterface;
 import cn.nukkit.network.protocol.*;
 import cn.nukkit.utils.RuleData;
 import cn.nukkit.utils.TextFormat;
-import co.aikar.timings.Timing;
-import co.aikar.timings.TimingsManager;
 import org.itxtech.synapseapi.event.player.SynapsePlayerConnectEvent;
 import org.itxtech.synapseapi.event.player.SynapsePlayerTransferEvent;
 import org.itxtech.synapseapi.network.protocol.spp.PlayerLoginPacket;
@@ -35,11 +33,9 @@ import java.util.*;
  */
 public class SynapsePlayer extends Player {
 
-    private static final Map<Byte, Timing> handlePlayerDataPacketTimings = new HashMap<>();
     public boolean isSynapseLogin = false;
     protected SynapseEntry synapseEntry;
     private boolean isFirstTimeLogin = false;
-    private long synapseSlowLoginUntil = 0;
     public RuleData[] ruleDatas = new RuleData[0];
 
     public SynapsePlayer(SourceInterface interfaz, SynapseEntry synapseEntry, Long clientID, String ip, int port) {
@@ -48,12 +44,6 @@ public class SynapsePlayer extends Player {
         this.isSynapseLogin = this.synapseEntry != null;
     }
 
-    /**
-     * Returns a client-friendly gamemode of the specified real gamemode
-     * This function takes care of handling gamemodes known to MCPE (as of 1.1.0.3, that includes Survival, Creative and Adventure)
-     * <p>
-     * TODO: remove this when Spectator Mode gets added properly to MCPE
-     */
     private static int getClientFriendlyGamemode(int gamemode) {
         gamemode &= 0x03;
         if (gamemode == Player.SPECTATOR) {
@@ -335,11 +325,6 @@ public class SynapsePlayer extends Player {
         this.dataPacket(chunkRadiusUpdatePacket);
     }
 
-    @Override
-    protected void doFirstSpawn() {
-        super.doFirstSpawn();
-    }
-
     protected void forceSendEmptyChunks() {
         int chunkPositionX = this.getFloorX() >> 4;
         int chunkPositionZ = this.getFloorZ() >> 4;
@@ -394,15 +379,8 @@ public class SynapsePlayer extends Player {
             super.handleDataPacket(packet);
             return;
         }
-        Timing dataPacketTiming = handlePlayerDataPacketTimings.getOrDefault(packet.pid(), TimingsManager.getTiming("SynapseEntry - HandlePlayerDataPacket - " + packet.getClass().getSimpleName()));
-        dataPacketTiming.startTiming();
 
         super.handleDataPacket(packet);
-
-        dataPacketTiming.stopTiming();
-        if (!handlePlayerDataPacketTimings.containsKey(packet.pid()))
-            handlePlayerDataPacketTimings.put(packet.pid(), dataPacketTiming);
-
     }
 
     @Override

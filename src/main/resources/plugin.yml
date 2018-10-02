@@ -4,3 +4,13 @@ version: "3.0"
 api: ["1.0.0"]
 load: STARTUP
 author: iTXTech, PetteriM1
+
+commands:
+  transfer:
+    description: Switch server
+    usage: "/transfer <description>"
+    permission: synapse.transfer
+permissions:
+  synapse.transfer:
+    description: "Allows player to transfer to other server"
+    default: true

@@ -1,7 +1,6 @@
 package org.itxtech.synapseapi.messaging;
 
-public class ReservedChannelException
-        extends RuntimeException {
+public class ReservedChannelException extends RuntimeException {
     public ReservedChannelException() {
         this("Attempted to register for a reserved channel name.");
     }
@@ -10,4 +9,3 @@ public class ReservedChannelException
         super("Attempted to register for a reserved channel name ('" + name + "')");
     }
 }
-

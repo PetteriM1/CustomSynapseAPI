@@ -76,4 +76,3 @@ public final class PluginMessageListenerRegistration {
         return hash;
     }
 }
-

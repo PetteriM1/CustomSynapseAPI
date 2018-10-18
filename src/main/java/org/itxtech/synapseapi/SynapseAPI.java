@@ -1,11 +1,16 @@
 package org.itxtech.synapseapi;
 
+import cn.nukkit.Player;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.event.EventHandler;
+import cn.nukkit.event.EventPriority;
+import cn.nukkit.event.player.PlayerChatEvent;
 import cn.nukkit.network.RakNetInterface;
 import cn.nukkit.network.SourceInterface;
 import cn.nukkit.network.protocol.DataPacket;
 import cn.nukkit.network.protocol.ProtocolInfo;
+import cn.nukkit.plugin.Plugin;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.ConfigSection;
 import org.itxtech.synapseapi.messaging.Messenger;
@@ -133,5 +138,16 @@ public class SynapseAPI extends PluginBase {
             }
         }
         return true;
+    }
+    
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    public void onMessage(PlayerChatEvent e) {
+        Player p = e.getPlayer();
+        if (!(p instanceof SynapsePlayer)) return;
+        String msg = e.getFormat();
+        for (SynapseEntry se : getSynapseEntries().values()) {
+            if (!se.equals(((SynapsePlayer) p).getSynapseEntry()))
+            se.sendPluginMessage((Plugin) this, "MessageAll", msg.getBytes());
+        }
     }
 }

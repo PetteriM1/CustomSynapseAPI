@@ -147,7 +147,7 @@ public class SynapseAPI extends PluginBase {
         String msg = e.getFormat();
         for (SynapseEntry se : getSynapseEntries().values()) {
             if (!se.equals(((SynapsePlayer) p).getSynapseEntry()))
-            se.sendPluginMessage((Plugin) this, "MessageAll", msg.getBytes());
+            se.sendPluginMessage((Plugin) this, "NemisysChat", msg.getBytes());
         }
     }
 }

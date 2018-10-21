@@ -5,6 +5,7 @@ import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.EventPriority;
+import cn.nukkit.event.Listener;
 import cn.nukkit.event.player.PlayerChatEvent;
 import cn.nukkit.network.RakNetInterface;
 import cn.nukkit.network.SourceInterface;
@@ -22,7 +23,7 @@ import java.util.*;
 /**
  * @author boybook
  */
-public class SynapseAPI extends PluginBase {
+public class SynapseAPI extends PluginBase implements Listener {
 
     public static boolean enable = true;
     private static SynapseAPI instance;
@@ -46,6 +47,7 @@ public class SynapseAPI extends PluginBase {
     @Override
     public void onEnable() {
         this.getServer().getNetwork().registerPacket(ProtocolInfo.SET_HEALTH_PACKET, SetHealthPacket.class);
+        this.getServer().getPluginManager().registerEvents(this, this);
         this.messenger = new StandardMessenger();
         loadEntries();
     }
@@ -147,7 +149,7 @@ public class SynapseAPI extends PluginBase {
         String msg = e.getFormat();
         for (SynapseEntry se : getSynapseEntries().values()) {
             if (!se.equals(((SynapsePlayer) p).getSynapseEntry()))
-            se.sendPluginMessage((Plugin) this, "NemisysChat", msg.getBytes());
+            se.sendChat(msg);
         }
     }
 }

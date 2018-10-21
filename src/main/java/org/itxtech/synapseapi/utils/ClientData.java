@@ -47,5 +47,4 @@ public class ClientData {
             return description;
         }
     }
-
 }

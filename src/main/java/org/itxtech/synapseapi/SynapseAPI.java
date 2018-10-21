@@ -1,11 +1,17 @@
 package org.itxtech.synapseapi;
 
+import cn.nukkit.Player;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.event.EventHandler;
+import cn.nukkit.event.EventPriority;
+import cn.nukkit.event.Listener;
+import cn.nukkit.event.player.PlayerChatEvent;
 import cn.nukkit.network.RakNetInterface;
 import cn.nukkit.network.SourceInterface;
 import cn.nukkit.network.protocol.DataPacket;
 import cn.nukkit.network.protocol.ProtocolInfo;
+import cn.nukkit.plugin.Plugin;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.ConfigSection;
 import org.itxtech.synapseapi.messaging.Messenger;
@@ -17,7 +23,7 @@ import java.util.*;
 /**
  * @author boybook
  */
-public class SynapseAPI extends PluginBase {
+public class SynapseAPI extends PluginBase implements Listener {
 
     public static boolean enable = true;
     private static SynapseAPI instance;
@@ -41,6 +47,7 @@ public class SynapseAPI extends PluginBase {
     @Override
     public void onEnable() {
         this.getServer().getNetwork().registerPacket(ProtocolInfo.SET_HEALTH_PACKET, SetHealthPacket.class);
+        this.getServer().getPluginManager().registerEvents(this, this);
         this.messenger = new StandardMessenger();
         loadEntries();
     }
@@ -133,5 +140,16 @@ public class SynapseAPI extends PluginBase {
             }
         }
         return true;
+    }
+    
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    public void onMessage(PlayerChatEvent e) {
+        Player p = e.getPlayer();
+        if (!(p instanceof SynapsePlayer)) return;
+        String msg = e.getFormat();
+        for (SynapseEntry se : getSynapseEntries().values()) {
+            if (!se.equals(((SynapsePlayer) p).getSynapseEntry()))
+            se.sendChat(msg);
+        }
     }
 }

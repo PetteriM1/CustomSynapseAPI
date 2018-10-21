@@ -1,7 +1,6 @@
 package org.itxtech.synapseapi.messaging;
 
-public class MessageTooLargeException
-        extends RuntimeException {
+public class MessageTooLargeException extends RuntimeException {
     public MessageTooLargeException() {
         this("Attempted to send a plugin message that was too large. The maximum length is 32766 bytes.");
     }
@@ -18,4 +17,3 @@ public class MessageTooLargeException
         super(msg);
     }
 }
-

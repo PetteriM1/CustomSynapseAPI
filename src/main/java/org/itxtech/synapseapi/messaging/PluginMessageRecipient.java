@@ -9,4 +9,3 @@ public interface PluginMessageRecipient {
 
     Set<String> getListeningPluginChannels();
 }
-

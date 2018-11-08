@@ -418,4 +418,11 @@ public class SynapseEntry {
 
         this.sendDataPacket(pk);
     }
+    
+    public void sendChat(String text) {
+        ChatPacket pk = new ChatPacket();
+        pk.text = text;
+
+        this.sendDataPacket(pk);
+    }
 }

@@ -364,11 +364,6 @@ public class SynapsePlayer extends Player {
         return false;
     }
 
-    public boolean transferToLobby() {
-        new TransferRunnable(this, "lobby").run();
-        return true;
-    }
-
     @Override
     public void handleDataPacket(DataPacket packet) {
         if (!this.isSynapseLogin) {

@@ -16,6 +16,7 @@ import cn.nukkit.math.NukkitMath;
 import cn.nukkit.nbt.tag.*;
 import cn.nukkit.network.SourceInterface;
 import cn.nukkit.network.protocol.*;
+import cn.nukkit.utils.RuleData;
 import cn.nukkit.utils.TextFormat;
 import org.itxtech.synapseapi.event.player.SynapsePlayerConnectEvent;
 import org.itxtech.synapseapi.event.player.SynapsePlayerTransferEvent;
@@ -35,6 +36,7 @@ public class SynapsePlayer extends Player {
     public boolean isSynapseLogin = false;
     protected SynapseEntry synapseEntry;
     private boolean isFirstTimeLogin = false;
+    public RuleData[] ruleDatas = new RuleData[0];
 
     public SynapsePlayer(SourceInterface interfaz, SynapseEntry synapseEntry, Long clientID, String ip, int port) {
         super(interfaz, clientID, ip, port);
@@ -257,7 +259,9 @@ public class SynapsePlayer extends Player {
             startGamePacket.levelId = "";
             startGamePacket.worldName = this.getServer().getNetwork().getName();
             startGamePacket.generator = 1;
-            startGamePacket.gameRules = this.getLevel().getGameRules();
+            for (RuleData rule : this.ruleDatas) {
+                startGamePacket.putRuleData(rule);
+            }
             this.dataPacket(startGamePacket);
         } else {
             AdventureSettings newSettings = this.getAdventureSettings().clone(this);

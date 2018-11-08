@@ -7,7 +7,7 @@
     <name>SynapseAPI</name>
     <groupId>org.itxtech.synapse</groupId>
     <artifactId>SynapseAPI</artifactId>
-    <version>SuomiCraftPE-X</version>
+    <version>SuomiCraftPE</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -36,11 +36,11 @@
         </dependency>
         <dependency>
              <groupId>cn.nukkit</groupId>
-             <artifactId>nukkit</artifactId>
-             <version>1.0-SNAPSHOT</version>
+             <artifactId>Nukkit</artifactId>
+             <version>SuomiCraftPE</version>
              <optional>false</optional>
              <scope>system</scope>
-             <systemPath>${basedir}/lib/NukkitX.jar</systemPath>
+             <systemPath>${basedir}/lib/Nukkit-SuomiCraftPE.jar</systemPath>
          </dependency>
     </dependencies>
 

@@ -44,6 +44,7 @@ public class SynapseAPI extends PluginBase implements Listener {
     @Override
     public void onEnable() {
         this.getServer().getNetwork().registerPacket(ProtocolInfo.SET_HEALTH_PACKET, SetHealthPacket.class);
+        this.getServer().getPluginManager().registerEvents(this, this);
         this.messenger = new StandardMessenger();
         loadEntries();
     }

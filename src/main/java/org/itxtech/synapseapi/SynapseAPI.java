@@ -2,6 +2,9 @@ package org.itxtech.synapseapi;
 
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.event.EventHandler;
+import cn.nukkit.event.Listener;
+import cn.nukkit.event.player.PlayerQuitEvent;
 import cn.nukkit.network.RakNetInterface;
 import cn.nukkit.network.SourceInterface;
 import cn.nukkit.network.protocol.DataPacket;
@@ -17,7 +20,7 @@ import java.util.*;
 /**
  * @author boybook
  */
-public class SynapseAPI extends PluginBase {
+public class SynapseAPI extends PluginBase implements Listener {
 
     public static boolean enable = true;
     private static SynapseAPI instance;
@@ -133,5 +136,13 @@ public class SynapseAPI extends PluginBase {
             }
         }
         return true;
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent e) {
+        String message = e.getQuitMessage().toString();
+        if (message.equals("timeout") || message.equals("generic reason") || message.equals("client disconnect") || message.equals("unknown")) {
+            e.setQuitMessage("");
+        }
     }
 }

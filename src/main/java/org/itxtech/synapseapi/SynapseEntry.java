@@ -276,7 +276,6 @@ public class SynapseEntry {
         }
 
         long finalTime = System.currentTimeMillis();
-        long usedTime = finalTime - time;
         if (((finalTime - this.lastUpdate) >= 30000) && this.synapseInterface.isConnected()) {
             this.synapseInterface.reconnect();
         }

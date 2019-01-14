@@ -27,68 +27,68 @@ public class DataPacketEidReplacer {
         boolean change = true;
 
         switch (packet.pid()) {
-            case AddPlayerPacket.NETWORK_ID:
+            case ProtocolInfo.ADD_PLAYER_PACKET:
                 AddPlayerPacket app = (AddPlayerPacket) packet;
 
                 app.metadata = replaceMetadata(app.metadata, from, to);
                 break;
-            case AddEntityPacket.NETWORK_ID:
+            case ProtocolInfo.ADD_ENTITY_PACKET:
                 AddEntityPacket aep = (AddEntityPacket) packet;
 
                 aep.metadata = replaceMetadata(aep.metadata, from, to);
                 break;
-            case AddItemEntityPacket.NETWORK_ID:
+            case ProtocolInfo.ADD_ITEM_ENTITY_PACKET:
                 AddItemEntityPacket aiep = (AddItemEntityPacket) packet;
 
                 aiep.metadata = replaceMetadata(aiep.metadata, from, to);
                 break;
-            case AnimatePacket.NETWORK_ID:
+            case ProtocolInfo.ANIMATE_PACKET:
                 if (((AnimatePacket) packet).eid == from) ((AnimatePacket) packet).eid = to;
                 break;
-            case TakeItemEntityPacket.NETWORK_ID:
+            case ProtocolInfo.TAKE_ITEM_ENTITY_PACKET:
                 if (((TakeItemEntityPacket) packet).entityId == from) ((TakeItemEntityPacket) packet).entityId = to;
                 break;
-            case SetEntityMotionPacket.NETWORK_ID:
+            case ProtocolInfo.SET_ENTITY_MOTION_PACKET:
                 if (((SetEntityMotionPacket) packet).eid == from) ((SetEntityMotionPacket) packet).eid = to;
                 break;
-            case SetEntityLinkPacket.NETWORK_ID:
+            case ProtocolInfo.SET_ENTITY_LINK_PACKET:
                 if (((SetEntityLinkPacket) packet).rider == from) ((SetEntityLinkPacket) packet).rider = to;
                 if (((SetEntityLinkPacket) packet).riding == from) ((SetEntityLinkPacket) packet).riding = to;
                 break;
-            case SetEntityDataPacket.NETWORK_ID:
+            case ProtocolInfo.SET_ENTITY_DATA_PACKET:
                 SetEntityDataPacket sedp = (SetEntityDataPacket) packet;
 
                 if (sedp.eid == from) sedp.eid = to;
                 sedp.metadata = replaceMetadata(sedp.metadata, from, to);
                 break;
-            case UpdateAttributesPacket.NETWORK_ID:
+            case ProtocolInfo.UPDATE_ATTRIBUTES_PACKET:
                 if (((UpdateAttributesPacket) packet).entityId == from) ((UpdateAttributesPacket) packet).entityId = to;
                 break;
-            case EntityEventPacket.NETWORK_ID:
+            case ProtocolInfo.ENTITY_EVENT_PACKET:
                 if (((EntityEventPacket) packet).eid == from) ((EntityEventPacket) packet).eid = to;
                 break;
-            case MovePlayerPacket.NETWORK_ID:
+            case ProtocolInfo.MOVE_PLAYER_PACKET:
                 if (((MovePlayerPacket) packet).eid == from) ((MovePlayerPacket) packet).eid = to;
                 break;
-            case MobEquipmentPacket.NETWORK_ID:
+            case ProtocolInfo.MOB_EQUIPMENT_PACKET:
                 if (((MobEquipmentPacket) packet).eid == from) ((MobEquipmentPacket) packet).eid = to;
                 break;
-            case MobEffectPacket.NETWORK_ID:
+            case ProtocolInfo.MOB_EFFECT_PACKET:
                 if (((MobEffectPacket) packet).eid == from) ((MobEffectPacket) packet).eid = to;
                 break;
-            case MoveEntityAbsolutePacket.NETWORK_ID:
+            case ProtocolInfo.MOVE_ENTITY_ABSOLUTE_PACKET:
                 if (((MoveEntityAbsolutePacket) packet).eid == from) ((MoveEntityAbsolutePacket) packet).eid = to;
                 break;
-            case MobArmorEquipmentPacket.NETWORK_ID:
+            case ProtocolInfo.MOB_ARMOR_EQUIPMENT_PACKET:
                 if (((MobArmorEquipmentPacket) packet).eid == from) ((MobArmorEquipmentPacket) packet).eid = to;
                 break;
-            case PlayerListPacket.NETWORK_ID:
+            case ProtocolInfo.PLAYER_LIST_PACKET:
                 Arrays.stream(((PlayerListPacket) packet).entries).filter(entry -> entry.entityId == from).forEach(entry -> entry.entityId = to);
                 break;
-            case BossEventPacket.NETWORK_ID:
+            case ProtocolInfo.BOSS_EVENT_PACKET:
                 if (((BossEventPacket) packet).bossEid == from) ((BossEventPacket) packet).bossEid = to;
                 break;
-            case AdventureSettingsPacket.NETWORK_ID:
+            case ProtocolInfo.ADVENTURE_SETTINGS_PACKET:
                 if (((AdventureSettingsPacket) packet).entityUniqueId == from)
                     ((AdventureSettingsPacket) packet).entityUniqueId = to;
                 break;

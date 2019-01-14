@@ -205,7 +205,6 @@ public class SynapsePlayer extends Player {
     }
 
     @Override
-    @SuppressWarnings("deprecation")
     protected void completeLoginSequence() {
         if (!this.isSynapseLogin) {
             super.completeLoginSequence();
@@ -312,6 +311,12 @@ public class SynapsePlayer extends Player {
         this.setEnableClientCommand(true);
 
         this.forceMovement = this.teleportPosition = this.getPosition();
+
+        if (this.protocol >= 313) {
+            this.getServer().getScheduler().scheduleTask(null, () -> {
+                this.dataPacket(new AvailableEntityIdentifiersPacket());
+            }, true);
+        }
 
         this.server.addOnlinePlayer(this);
         this.server.onPlayerCompleteLoginSequence(this);

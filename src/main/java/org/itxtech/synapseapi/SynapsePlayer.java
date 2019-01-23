@@ -261,6 +261,7 @@ public class SynapsePlayer extends Player {
             for (RuleData rule : this.ruleDatas) {
                 startGamePacket.putRuleData(rule);
             }
+            startGamePacket.protocol = this.protocol;
             this.dataPacket(startGamePacket);
         } else {
             AdventureSettings newSettings = this.getAdventureSettings().clone(this);

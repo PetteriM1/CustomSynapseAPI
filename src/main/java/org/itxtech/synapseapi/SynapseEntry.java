@@ -39,7 +39,6 @@ public class SynapseEntry {
     private SynapseInterface synapseInterface;
     private boolean verified = false;
     private long lastUpdate;
-    private long lastRecvInfo;
     private Map<UUID, SynapsePlayer> players = new HashMap<>();
     private SynLibInterface synLibInterface;
     private ClientData clientData;
@@ -63,7 +62,6 @@ public class SynapseEntry {
         this.synapseInterface = new SynapseInterface(this, this.serverIp, this.port);
         this.synLibInterface = new SynLibInterface(this.synapseInterface);
         this.lastUpdate = System.currentTimeMillis();
-        this.lastRecvInfo = System.currentTimeMillis();
         this.getSynapse().getServer().getScheduler().scheduleRepeatingTask(SynapseAPI.getInstance(), new Ticker(this), 1);
 
         Thread ticker = new Thread(new AsyncTicker());
@@ -326,7 +324,6 @@ public class SynapseEntry {
                         break;
                     case InformationPacket.TYPE_CLIENT_DATA:
                         this.clientData = new Gson().fromJson(informationPacket.message, ClientData.class);
-                        this.lastRecvInfo = System.currentTimeMillis();
                         break;
                 }
                 break;

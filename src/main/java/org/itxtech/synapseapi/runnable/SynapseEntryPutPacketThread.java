@@ -112,13 +112,11 @@ public class SynapseEntryPutPacketThread extends Thread {
     private class Entry {
         private Player player;
         private DataPacket packet;
-        private boolean needACK;
         private boolean immediate;
 
         public Entry(Player player, DataPacket packet, boolean needACK, boolean immediate) {
             this.player = player;
             this.packet = packet;
-            this.needACK = needACK;
             this.immediate = immediate;
         }
     }

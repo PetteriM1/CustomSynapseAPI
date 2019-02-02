@@ -13,11 +13,9 @@ public class SynapseDataPacketReceiveEvent extends SynapseEvent implements Cance
 
     private static final HandlerList handlers = new HandlerList();
     private final SynapseDataPacket packet;
-    private final SynapseEntry entry;
 
     public SynapseDataPacketReceiveEvent(SynapseEntry entry, SynapseDataPacket packet) {
         this.packet = packet;
-        this.entry = entry;
     }
 
     public static HandlerList getHandlers() {

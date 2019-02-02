@@ -9,8 +9,9 @@ import java.util.Set;
  * @author CreeperFace
  */
 public interface Messenger {
-    int MAX_MESSAGE_SIZE = 32766;
-    int MAX_CHANNEL_SIZE = 20;
+
+    public static final int MAX_MESSAGE_SIZE = 32766;
+    public static final int MAX_CHANNEL_SIZE = 20;
 
     boolean isReservedChannel(String channel);
 

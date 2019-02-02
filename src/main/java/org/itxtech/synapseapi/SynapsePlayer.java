@@ -249,15 +249,8 @@ public class SynapsePlayer extends Player {
             startGamePacket.spawnX = (int) spawnPosition.x;
             startGamePacket.spawnY = (int) spawnPosition.y;
             startGamePacket.spawnZ = (int) spawnPosition.z;
-            startGamePacket.hasAchievementsDisabled = true;
-            startGamePacket.dayCycleStopTime = -1;
-            startGamePacket.eduMode = false;
-            startGamePacket.rainLevel = 0;
-            startGamePacket.lightningLevel = 0;
             startGamePacket.commandsEnabled = this.isEnableClientCommand();
-            startGamePacket.levelId = "";
             startGamePacket.worldName = this.getServer().getNetwork().getName();
-            startGamePacket.generator = 1;
             for (RuleData rule : this.ruleDatas) {
                 startGamePacket.putRuleData(rule);
             }
@@ -378,14 +371,6 @@ public class SynapsePlayer extends Player {
         }
 
         super.handleDataPacket(packet);
-    }
-
-    @Override
-    public boolean onUpdate(int currentTick) {
-        if (!this.isSynapseLogin) {
-            return super.onUpdate(currentTick);
-        }
-        return super.onUpdate(currentTick);
     }
 
     public void setUniqueId(UUID uuid) {

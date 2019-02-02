@@ -1,6 +1,8 @@
 package org.itxtech.synapseapi.messaging;
 
+@SuppressWarnings("serial")
 public class ChannelNotRegisteredException extends RuntimeException {
+
     public ChannelNotRegisteredException() {
         this("Attempted to send a plugin message through an unregistered channel.");
     }

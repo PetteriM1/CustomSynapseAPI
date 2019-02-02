@@ -292,6 +292,7 @@ public class StandardMessenger implements Messenger {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Set<String> getIncomingChannels(Plugin plugin) {
         if (plugin == null) {
             throw new IllegalArgumentException("Plugin cannot be null");

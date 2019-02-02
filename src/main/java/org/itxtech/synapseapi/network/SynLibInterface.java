@@ -29,7 +29,6 @@ public class SynLibInterface implements SourceInterface {
 
     @Override
     public void setName(String name) {
-
     }
 
     @Override

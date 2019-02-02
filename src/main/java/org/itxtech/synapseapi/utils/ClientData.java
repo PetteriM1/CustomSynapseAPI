@@ -21,6 +21,7 @@ public class ClientData {
     }
 
     public class Entry {
+
         private String ip;
         private int port;
         private int playerCount;

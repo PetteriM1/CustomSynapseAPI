@@ -89,8 +89,7 @@ public class DataPacketEidReplacer {
                 if (((BossEventPacket) packet).bossEid == from) ((BossEventPacket) packet).bossEid = to;
                 break;
             case ProtocolInfo.ADVENTURE_SETTINGS_PACKET:
-                if (((AdventureSettingsPacket) packet).entityUniqueId == from)
-                    ((AdventureSettingsPacket) packet).entityUniqueId = to;
+                if (((AdventureSettingsPacket) packet).entityUniqueId == from) ((AdventureSettingsPacket) packet).entityUniqueId = to;
                 break;
             case ProtocolInfo.UPDATE_EQUIPMENT_PACKET:
                 if (((UpdateEquipmentPacket) packet).eid == from) ((UpdateEquipmentPacket) packet).eid = to;

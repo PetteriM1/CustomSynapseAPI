@@ -36,7 +36,6 @@ public class SynapsePlayer extends Player {
     public boolean isSynapseLogin = false;
     protected SynapseEntry synapseEntry;
     private boolean isFirstTimeLogin = false;
-    public RuleData[] ruleDatas = new RuleData[0];
 
     public SynapsePlayer(SourceInterface interfaz, SynapseEntry synapseEntry, Long clientID, String ip, int port) {
         super(interfaz, clientID, ip, port);
@@ -251,10 +250,13 @@ public class SynapsePlayer extends Player {
             startGamePacket.spawnZ = (int) spawnPosition.z;
             startGamePacket.commandsEnabled = this.isEnableClientCommand();
             startGamePacket.worldName = this.getServer().getNetwork().getName();
-            for (RuleData rule : this.ruleDatas) {
-                startGamePacket.putRuleData(rule);
-            }
-            startGamePacket.protocol = this.protocol;
+            startGamePacket.gameRules = this.getLevel().getGameRules();
+
+            try {
+                Class.forName("cn.nukkit.utils.EntityUtils");
+                startGamePacket.protocol = this.protocol;
+            } catch (Exception ignore) {}
+
             this.dataPacket(startGamePacket);
         } else {
             AdventureSettings newSettings = this.getAdventureSettings().clone(this);
@@ -290,7 +292,7 @@ public class SynapsePlayer extends Player {
                 String.valueOf(NukkitMath.round(this.y, 4)),
                 String.valueOf(NukkitMath.round(this.z, 4))));
 
-        if (this.isOp()) {
+        if (this.isOp() || this.hasPermission("nukkit.textcolor")) {
             this.setRemoveFormat(false);
         }
 
@@ -306,11 +308,14 @@ public class SynapsePlayer extends Player {
 
         this.forceMovement = this.teleportPosition = this.getPosition();
 
-        if (this.protocol >= 313) {
-            this.getServer().getScheduler().scheduleTask(null, () -> {
-                this.dataPacket(new AvailableEntityIdentifiersPacket());
-            }, true);
-        }
+        try {
+            Class.forName("cn.nukkit.utils.EntityUtils");
+            if (this.protocol >= 313) {
+                this.getServer().getScheduler().scheduleTask(null, () -> {
+                    this.dataPacket(new AvailableEntityIdentifiersPacket());
+                }, true);
+            }
+        } catch (Exception ignore) {}
 
         this.server.addOnlinePlayer(this);
         this.server.onPlayerCompleteLoginSequence(this);

@@ -131,7 +131,13 @@ public class SynapseAPI extends PluginBase implements Listener {
                     p.sendMessage("Usage: /transfer <description>");
                 }
             } else if (cmd.getName().equalsIgnoreCase("hub")) {
-                p.transferByDescription(getConfig().getString("hub"));
+                List<String> l = getConfig().getStringList("lobbies");
+                if (l.size() == 0) return true;
+                if (!l.contains(p.getSynapseEntry().getServerDescription()) && !p.getSynapseEntry().isLobbyServer()) {
+                    p.transferByDescription(l.get(new Random().nextInt(l.size())));
+                } else {
+                    p.sendMessage("\u00A7cYou are already on a lobby server");
+                }
             }
         }
         return true;

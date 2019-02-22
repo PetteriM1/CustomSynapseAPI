@@ -1,5 +1,6 @@
 disable-rak: true
 enable: true
+hub: "lobby"
 
 entries:
   - server-ip: 127.0.0.1

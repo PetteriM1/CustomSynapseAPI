@@ -83,6 +83,7 @@ public class SynapseAPI extends PluginBase implements Listener {
         return data;
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private void loadEntries() {
         this.saveDefaultConfig();
         enable = this.getConfig().getBoolean("enable", true);
@@ -101,7 +102,6 @@ public class SynapseAPI extends PluginBase implements Listener {
             List entries = this.getConfig().getList("entries");
 
             for (Object entry : entries) {
-                @SuppressWarnings("unchecked")
                 ConfigSection section = new ConfigSection((LinkedHashMap) entry);
                 String serverIp = section.getString("server-ip", "127.0.0.1");
                 int port = section.getInt("server-port", 10305);
@@ -114,7 +114,6 @@ public class SynapseAPI extends PluginBase implements Listener {
                     this.addSynapseAPI(new SynapseEntry(this, serverIp, port, isLobbyServer, transfer, password, serverDescription));
                 }
             }
-
         }
     }
 
@@ -131,6 +130,8 @@ public class SynapseAPI extends PluginBase implements Listener {
                 } else {
                     p.sendMessage("Usage: /transfer <description>");
                 }
+            } else if (cmd.getName().equalsIgnoreCase("hub")) {
+                p.transferByDescription(getConfig().getString("hub"));
             }
         }
         return true;

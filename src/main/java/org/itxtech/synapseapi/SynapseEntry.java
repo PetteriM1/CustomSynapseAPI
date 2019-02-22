@@ -58,12 +58,10 @@ public class SynapseEntry {
             return;
         }
         this.serverDescription = serverDescription;
-
         this.synapseInterface = new SynapseInterface(this, this.serverIp, this.port);
         this.synLibInterface = new SynLibInterface(this.synapseInterface);
         this.lastUpdate = System.currentTimeMillis();
         this.getSynapse().getServer().getScheduler().scheduleRepeatingTask(SynapseAPI.getInstance(), new Ticker(this), 1);
-
         Thread ticker = new Thread(new AsyncTicker());
         ticker.setName("SynapseAPI Async Ticker");
         ticker.start();

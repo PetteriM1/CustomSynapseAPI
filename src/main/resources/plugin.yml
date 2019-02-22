@@ -10,7 +10,14 @@ commands:
     description: Switch server
     usage: "/transfer <description>"
     permission: synapse.transfer
+  hub:
+    description: Transfer to lobby
+    usage: "/hub"
+    permission: synapse.transfer.hub
 permissions:
   synapse.transfer:
     description: "Allows player to transfer to other server"
+    default: true
+  synapse.transfer.hub:
+    description: "Allows player to use /hub"
     default: true

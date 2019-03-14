@@ -44,7 +44,7 @@ public class SynapsePlayer extends Player {
 
     static {
         try {
-            updateName = Server.class.getMethod("updateName", UUID.class, String.class);
+            updateName = Server.class.getDeclaredMethod("updateName", UUID.class, String.class);
             updateName.setAccessible(true);
         } catch (NoSuchMethodException e) {
             throw new RuntimeException(e);

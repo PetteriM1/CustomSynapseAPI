@@ -10,18 +10,14 @@
     <version>SuomiCraftPE</version>
 
     <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>1.8</java.version>
         <junit.jupiter.version>5.0.0-M4</junit.jupiter.version>
         <junit.platform.version>1.0.0-M4</junit.platform.version>
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
-            <version>4.1.12.Final</version>
-        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
@@ -37,24 +33,16 @@
         <dependency>
              <groupId>cn.nukkit</groupId>
              <artifactId>Nukkit</artifactId>
-             <version>SuomiCraftPE</version>
+             <version>PM1E</version>
              <optional>false</optional>
              <scope>system</scope>
-             <systemPath>${basedir}/lib/Nukkit-SuomiCraftPE.jar</systemPath>
+             <systemPath>${basedir}/lib/Nukkit-PM1E.jar</systemPath>
          </dependency>
     </dependencies>
 
     <build>
         <pluginManagement>
             <plugins>
-                <plugin>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.1</version>
-                    <configuration>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
-                    </configuration>
-                </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>2.19</version>

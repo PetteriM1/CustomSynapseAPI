@@ -7,7 +7,7 @@
     <name>SynapseAPI</name>
     <groupId>org.itxtech.synapse</groupId>
     <artifactId>SynapseAPI</artifactId>
-    <version>SuomiCraftPE</version>
+    <version>SuomiCraftPE-X</version>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>

@@ -1,10 +1,12 @@
 package org.itxtech.synapseapi;
 
+import cn.nukkit.Player;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.player.PlayerQuitEvent;
+import cn.nukkit.event.server.BatchPacketsEvent;
 import cn.nukkit.network.RakNetInterface;
 import cn.nukkit.network.SourceInterface;
 import cn.nukkit.network.protocol.DataPacket;
@@ -12,7 +14,9 @@ import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.ConfigSection;
 import org.itxtech.synapseapi.messaging.Messenger;
 import org.itxtech.synapseapi.messaging.StandardMessenger;
+import org.itxtech.synapseapi.utils.DataPacketEidReplacer;
 
+import javax.xml.bind.DatatypeConverter;
 import java.util.*;
 
 /**
@@ -148,6 +152,41 @@ public class SynapseAPI extends PluginBase implements Listener {
         String message = e.getQuitMessage().toString();
         if (message.equals("timeout") || message.equals("generic reason") || message.equals("client disconnect") || message.equals("unknown")) {
             e.setQuitMessage("");
+        }
+    }
+
+    @EventHandler
+    public void onBatchPackets(BatchPacketsEvent e) {
+        e.setCancelled();
+        Player[] players = e.getPlayers();
+
+        DataPacket[] packets = e.getPackets();
+        HashMap<SynapseEntry, Map<Player, DataPacket[]>> map = new HashMap<>();
+
+        for (Player p : players) {
+            SynapsePlayer player = (SynapsePlayer) p;
+
+            SynapseEntry entry = player.getSynapseEntry();
+            Map<Player, DataPacket[]> playerPackets = map.get(entry);
+            if (playerPackets == null) {
+                playerPackets = new HashMap<>();
+            }
+
+            DataPacket[] replaced = Arrays.stream(packets)
+                    .map(packet -> DataPacketEidReplacer.replace(packet, p.getId(), SynapsePlayer.REPLACE_ID))
+                    .toArray(DataPacket[]::new);
+
+            playerPackets.put(player, replaced);
+
+            map.put(entry, playerPackets);
+        }
+
+        for (Map.Entry<SynapseEntry, Map<Player, DataPacket[]>> entry : map.entrySet()) {
+            for (Map.Entry<Player, DataPacket[]> playerEntry : entry.getValue().entrySet()) {
+                for (DataPacket pk : playerEntry.getValue()) {
+                    playerEntry.getKey().dataPacket(pk);
+                }
+            }
         }
     }
 }

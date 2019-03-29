@@ -36,6 +36,8 @@ import java.util.*;
  */
 public class SynapsePlayer extends Player {
 
+    public static final long REPLACE_ID = Long.MAX_VALUE;
+
     private static final Method updateName;
 
     public boolean isSynapseLogin = false;
@@ -264,8 +266,8 @@ public class SynapsePlayer extends Player {
         Position spawnPosition = this.getSpawn();
         if (this.isFirstTimeLogin) {
             StartGamePacket startGamePacket = new StartGamePacket();
-            startGamePacket.entityUniqueId = Long.MAX_VALUE;
-            startGamePacket.entityRuntimeId = Long.MAX_VALUE;
+            startGamePacket.entityUniqueId = REPLACE_ID;
+            startGamePacket.entityRuntimeId = REPLACE_ID;
             startGamePacket.playerGamemode = getClientFriendlyGamemode(this.gamemode);
             startGamePacket.x = (float) this.x;
             startGamePacket.y = (float) this.y;
@@ -422,26 +424,17 @@ public class SynapsePlayer extends Player {
     @Override
     public int dataPacket(DataPacket packet, boolean needACK) {
         if (!this.isSynapseLogin) return super.dataPacket(packet, needACK);
-        packet = DataPacketEidReplacer.replace(packet, this.getId(), Long.MAX_VALUE);
-
-        DataPacketSendEvent ev = new DataPacketSendEvent(this, packet);
-        this.server.getPluginManager().callEvent(ev);
-        if (ev.isCancelled()) {
-            return -1;
-        }
-
-        if (!packet.isEncoded) {
-            packet.encode();
-            packet.isEncoded = true;
-        }
-
-        return this.interfaz.putPacket(this, packet, needACK);
+        return sendDataPacket(packet, needACK, false);
     }
 
     @Override
     public int directDataPacket(DataPacket packet, boolean needACK) {
         if (!this.isSynapseLogin) return super.directDataPacket(packet, needACK);
-        packet = DataPacketEidReplacer.replace(packet, this.getId(), Long.MAX_VALUE);
+        return sendDataPacket(packet, needACK, true);
+    }
+
+    public int sendDataPacket(DataPacket packet, boolean needACK, boolean direct) {
+        packet = DataPacketEidReplacer.replace(packet, this.getId(), REPLACE_ID);
         DataPacketSendEvent ev = new DataPacketSendEvent(this, packet);
         this.server.getPluginManager().callEvent(ev);
         if (ev.isCancelled()) {
@@ -453,6 +446,6 @@ public class SynapsePlayer extends Player {
             packet.isEncoded = true;
         }
 
-        return this.interfaz.putPacket(this, packet, needACK, true);
+        return this.interfaz.putPacket(this, packet, needACK, direct);
     }
 }

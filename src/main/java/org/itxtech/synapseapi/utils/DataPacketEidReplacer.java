@@ -25,87 +25,156 @@ public class DataPacketEidReplacer {
 
     public static DataPacket replace(DataPacket pk, long from, long to) {
         DataPacket packet = pk.clone();
-        boolean change = true;
+        boolean change = false;
 
         switch (packet.pid()) {
             case ProtocolInfo.ADD_PLAYER_PACKET:
                 AddPlayerPacket app = (AddPlayerPacket) packet;
 
-                app.metadata = replaceMetadata(app.metadata, from, to);
+                EntityMetadata replaced = replaceMetadata(app.metadata, from, to);
+
+                if (replaced != null) {
+                    change = true;
+                    app.metadata = replaced;
+                }
                 break;
             case ProtocolInfo.ADD_ENTITY_PACKET:
                 AddEntityPacket aep = (AddEntityPacket) packet;
 
-                aep.metadata = replaceMetadata(aep.metadata, from, to);
+                replaced = replaceMetadata(aep.metadata, from, to);
+
+                if (replaced != null) {
+                    change = true;
+                    aep.metadata = replaced;
+                }
                 break;
             case ProtocolInfo.ADD_ITEM_ENTITY_PACKET:
                 AddItemEntityPacket aiep = (AddItemEntityPacket) packet;
 
-                aiep.metadata = replaceMetadata(aiep.metadata, from, to);
+                replaced = replaceMetadata(aiep.metadata, from, to);
+
+                if (replaced != null) {
+                    change = true;
+                    aiep.metadata = replaced;
+                }
                 break;
             case ProtocolInfo.ANIMATE_PACKET:
-                if (((AnimatePacket) packet).eid == from) ((AnimatePacket) packet).eid = to;
+                if (((AnimatePacket) packet).eid == from) {
+                    ((AnimatePacket) packet).eid = to;
+                    change = true;
+                }
                 break;
             case ProtocolInfo.TAKE_ITEM_ENTITY_PACKET:
-                if (((TakeItemEntityPacket) packet).entityId == from) ((TakeItemEntityPacket) packet).entityId = to;
+                if (((TakeItemEntityPacket) packet).entityId == from) {
+                    ((TakeItemEntityPacket) packet).entityId = to;
+                    change = true;
+                }
                 break;
             case ProtocolInfo.SET_ENTITY_MOTION_PACKET:
-                if (((SetEntityMotionPacket) packet).eid == from) ((SetEntityMotionPacket) packet).eid = to;
+                if (((SetEntityMotionPacket) packet).eid == from) {
+                    ((SetEntityMotionPacket) packet).eid = to;
+                    change = true;
+                }
                 break;
             case ProtocolInfo.SET_ENTITY_LINK_PACKET:
                 SetEntityLinkPacket selp = (SetEntityLinkPacket) packet;
 
-                if (selp.rider == from) selp.rider = to;
-                if (selp.riding == from) selp.riding = to;
+                if (selp.riderUniqueId == from) {
+                    selp.riderUniqueId = to;
+                    change = true;
+                }
+                if (selp.vehicleUniqueId == from) {
+                    selp.vehicleUniqueId = to;
+                    change = true;
+                }
                 break;
             case ProtocolInfo.SET_ENTITY_DATA_PACKET:
                 SetEntityDataPacket sedp = (SetEntityDataPacket) packet;
 
-                if (sedp.eid == from) sedp.eid = to;
-                sedp.metadata = replaceMetadata(sedp.metadata, from, to);
+                if (sedp.eid == from) {
+                    sedp.eid = to;
+                    change = true;
+                }
+
+                replaced = replaceMetadata(sedp.metadata, from, to);
+
+                if (replaced != null) {
+                    change = true;
+                    sedp.metadata = replaced;
+                }
                 break;
             case ProtocolInfo.UPDATE_ATTRIBUTES_PACKET:
-                if (((UpdateAttributesPacket) packet).entityId == from) ((UpdateAttributesPacket) packet).entityId = to;
+                if (((UpdateAttributesPacket) packet).entityId == from) {
+                    ((UpdateAttributesPacket) packet).entityId = to;
+                    change = true;
+                }
                 break;
             case ProtocolInfo.ENTITY_EVENT_PACKET:
-                if (((EntityEventPacket) packet).eid == from) ((EntityEventPacket) packet).eid = to;
+                if (((EntityEventPacket) packet).eid == from) {
+                    ((EntityEventPacket) packet).eid = to;
+                    change = true;
+                }
                 break;
             case ProtocolInfo.MOVE_PLAYER_PACKET:
-                if (((MovePlayerPacket) packet).eid == from) ((MovePlayerPacket) packet).eid = to;
+                if (((MovePlayerPacket) packet).eid == from) {
+                    ((MovePlayerPacket) packet).eid = to;
+                    change = true;
+                }
                 break;
             case ProtocolInfo.MOB_EQUIPMENT_PACKET:
-                if (((MobEquipmentPacket) packet).eid == from) ((MobEquipmentPacket) packet).eid = to;
+                if (((MobEquipmentPacket) packet).eid == from) {
+                    ((MobEquipmentPacket) packet).eid = to;
+                    change = true;
+                }
                 break;
             case ProtocolInfo.MOB_EFFECT_PACKET:
-                if (((MobEffectPacket) packet).eid == from) ((MobEffectPacket) packet).eid = to;
+                if (((MobEffectPacket) packet).eid == from) {
+                    ((MobEffectPacket) packet).eid = to;
+                    change = true;
+                }
                 break;
             case ProtocolInfo.MOVE_ENTITY_ABSOLUTE_PACKET:
-                if (((MoveEntityAbsolutePacket) packet).eid == from) ((MoveEntityAbsolutePacket) packet).eid = to;
+                if (((MoveEntityAbsolutePacket) packet).eid == from) {
+                    ((MoveEntityAbsolutePacket) packet).eid = to;
+                    change = true;
+                }
                 break;
             case ProtocolInfo.MOB_ARMOR_EQUIPMENT_PACKET:
-                if (((MobArmorEquipmentPacket) packet).eid == from) ((MobArmorEquipmentPacket) packet).eid = to;
+                if (((MobArmorEquipmentPacket) packet).eid == from) {
+                    ((MobArmorEquipmentPacket) packet).eid = to;
+                    change = true;
+                }
                 break;
             case ProtocolInfo.PLAYER_LIST_PACKET:
                 Arrays.stream(((PlayerListPacket) packet).entries).filter(entry -> entry.entityId == from).forEach(entry -> entry.entityId = to);
+                change = true;
                 break;
             case ProtocolInfo.BOSS_EVENT_PACKET:
-                if (((BossEventPacket) packet).bossEid == from) ((BossEventPacket) packet).bossEid = to;
+                if (((BossEventPacket) packet).bossEid == from) {
+                    ((BossEventPacket) packet).bossEid = to;
+                    change = true;
+                }
                 break;
             case ProtocolInfo.ADVENTURE_SETTINGS_PACKET:
-                if (((AdventureSettingsPacket) packet).entityUniqueId == from) ((AdventureSettingsPacket) packet).entityUniqueId = to;
+                if (((AdventureSettingsPacket) packet).entityUniqueId == from) {
+                    ((AdventureSettingsPacket) packet).entityUniqueId = to;
+                    change = true;
+                }
                 break;
             case ProtocolInfo.UPDATE_EQUIPMENT_PACKET:
-                if (((UpdateEquipmentPacket) packet).eid == from) ((UpdateEquipmentPacket) packet).eid = to;
+                if (((UpdateEquipmentPacket) packet).eid == from) {
+                    ((UpdateEquipmentPacket) packet).eid = to;
+                    change = true;
+                }
                 break;
-            default:
-                change = false;
         }
 
         if (change) {
             packet.isEncoded = false;
+            return packet;
         }
 
-        return packet;
+        return pk;
     }
 
     private static EntityMetadata replaceMetadata(EntityMetadata data, long from, long to) {
@@ -139,6 +208,8 @@ public class DataPacketEidReplacer {
                 MainLogger.getLogger().error("Exception while replacing metadata '" + key + "'", e);
             }
         }
+
+        if (!changed) return null;
 
         return data;
     }

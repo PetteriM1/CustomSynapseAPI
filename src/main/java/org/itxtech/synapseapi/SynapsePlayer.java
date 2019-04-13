@@ -40,7 +40,7 @@ public class SynapsePlayer extends Player {
 
     private static final Method updateName;
 
-    public boolean isSynapseLogin = false;
+    public boolean isSynapseLogin;
     protected SynapseEntry synapseEntry;
     private boolean isFirstTimeLogin = false;
 

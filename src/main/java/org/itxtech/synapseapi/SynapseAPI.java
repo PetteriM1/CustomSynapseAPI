@@ -164,21 +164,25 @@ public class SynapseAPI extends PluginBase implements Listener {
         HashMap<SynapseEntry, Map<Player, DataPacket[]>> map = new HashMap<>();
 
         for (Player p : players) {
-            SynapsePlayer player = (SynapsePlayer) p;
+            if (p instanceof  SynapsePlayer) {
+                SynapsePlayer player = (SynapsePlayer) p;
 
-            SynapseEntry entry = player.getSynapseEntry();
-            Map<Player, DataPacket[]> playerPackets = map.get(entry);
-            if (playerPackets == null) {
-                playerPackets = new HashMap<>();
+                SynapseEntry entry = player.getSynapseEntry();
+                Map<Player, DataPacket[]> playerPackets = map.get(entry);
+                if (playerPackets == null) {
+                    playerPackets = new HashMap<>();
+                }
+
+                DataPacket[] replaced = Arrays.stream(packets)
+                        .map(packet -> DataPacketEidReplacer.replace(packet, p.getId(), SynapsePlayer.REPLACE_ID))
+                        .toArray(DataPacket[]::new);
+
+                playerPackets.put(player, replaced);
+
+                map.put(entry, playerPackets);
+            } else {
+                e.setCancelled(false);
             }
-
-            DataPacket[] replaced = Arrays.stream(packets)
-                    .map(packet -> DataPacketEidReplacer.replace(packet, p.getId(), SynapsePlayer.REPLACE_ID))
-                    .toArray(DataPacket[]::new);
-
-            playerPackets.put(player, replaced);
-
-            map.put(entry, playerPackets);
         }
 
         for (Map.Entry<SynapseEntry, Map<Player, DataPacket[]>> entry : map.entrySet()) {

@@ -34,7 +34,7 @@ public class SynapsePlayer extends Player {
 
     public static final long REPLACE_ID = Long.MAX_VALUE;
 
-    public boolean isSynapseLogin = false;
+    public boolean isSynapseLogin;
     protected SynapseEntry synapseEntry;
     private boolean isFirstTimeLogin = false;
 

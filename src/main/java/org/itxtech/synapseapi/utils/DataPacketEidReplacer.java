@@ -55,8 +55,8 @@ public class DataPacketEidReplacer {
             case ProtocolInfo.SET_ENTITY_LINK_PACKET:
                 SetEntityLinkPacket selp = (SetEntityLinkPacket) packet;
 
-                if (selp.rider == from) selp.rider = to;
-                if (selp.riding == from) selp.riding = to;
+                if (selp.vehicleUniqueId == from) selp.vehicleUniqueId = to;
+                if (selp.riderUniqueId == from) selp.riderUniqueId = to;
                 break;
             case ProtocolInfo.SET_ENTITY_DATA_PACKET:
                 SetEntityDataPacket sedp = (SetEntityDataPacket) packet;

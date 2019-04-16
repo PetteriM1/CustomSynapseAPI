@@ -1,6 +1,7 @@
 package org.itxtech.synapseapi;
 
 import cn.nukkit.Player;
+import cn.nukkit.Server;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.event.EventHandler;
@@ -44,6 +45,13 @@ public class SynapseAPI extends PluginBase implements Listener {
 
     @Override
     public void onEnable() {
+        this.getServer().getScheduler().scheduleRepeatingTask(new cn.nukkit.scheduler.Task() {
+            @Override
+            public void onRun(int i) {
+                for (Player player : Server.getInstance().getOnlinePlayers().values())
+                    player.sendAttributes();
+            }
+        }, 1, true);
         this.getServer().getPluginManager().registerEvents(this, this);
         this.messenger = new StandardMessenger();
         loadEntries();

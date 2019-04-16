@@ -48,8 +48,9 @@ public class SynapseAPI extends PluginBase implements Listener {
         this.getServer().getScheduler().scheduleRepeatingTask(new cn.nukkit.scheduler.Task() {
             @Override
             public void onRun(int i) {
-                for (Player player : Server.getInstance().getOnlinePlayers().values())
-                    player.sendAttributes();
+                for (Player player : Server.getInstance().getOnlinePlayers().values()) {
+                    player.getFoodData().setLevel(player.getFoodData().getLevel());
+                }
             }
         }, 1, true);
         this.getServer().getPluginManager().registerEvents(this, this);

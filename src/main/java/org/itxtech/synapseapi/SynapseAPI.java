@@ -16,7 +16,6 @@ import org.itxtech.synapseapi.messaging.Messenger;
 import org.itxtech.synapseapi.messaging.StandardMessenger;
 import org.itxtech.synapseapi.utils.DataPacketEidReplacer;
 
-import javax.xml.bind.DatatypeConverter;
 import java.util.*;
 
 /**

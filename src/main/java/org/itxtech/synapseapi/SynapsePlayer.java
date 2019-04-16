@@ -20,6 +20,7 @@ import cn.nukkit.utils.TextFormat;
 import org.itxtech.synapseapi.event.player.SynapsePlayerConnectEvent;
 import org.itxtech.synapseapi.event.player.SynapsePlayerTransferEvent;
 import org.itxtech.synapseapi.network.protocol.spp.PlayerLoginPacket;
+import org.itxtech.synapseapi.runnable.FastTransferHackRunnable;
 import org.itxtech.synapseapi.runnable.TransferRunnable;
 import org.itxtech.synapseapi.utils.ClientData;
 import org.itxtech.synapseapi.utils.ClientData.Entry;
@@ -73,7 +74,7 @@ public class SynapsePlayer extends Player {
     }
 
     @Override
-    protected void processLogin() {
+    public void processLogin() {
         if (!this.isSynapseLogin) {
             super.processLogin();
             return;
@@ -205,7 +206,7 @@ public class SynapsePlayer extends Player {
     }
 
     @Override
-    protected void completeLoginSequence() {
+    public void completeLoginSequence() {
         if (!this.isSynapseLogin) {
             super.completeLoginSequence();
             return;
@@ -326,7 +327,7 @@ public class SynapsePlayer extends Player {
         this.dataPacket(chunkRadiusUpdatePacket);
     }
 
-    protected void forceSendEmptyChunks() {
+    public void forceSendEmptyChunks() {
         int chunkPositionX = this.getFloorX() >> 4;
         int chunkPositionZ = this.getFloorZ() >> 4;
         List<FullChunkDataPacket> pkList = new ArrayList<>();
@@ -363,6 +364,7 @@ public class SynapsePlayer extends Player {
             }
 
             new TransferRunnable(this, hash).run();
+            new FastTransferHackRunnable(this).run();
             return true;
         }
 

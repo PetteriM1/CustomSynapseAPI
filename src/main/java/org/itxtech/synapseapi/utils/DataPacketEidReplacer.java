@@ -64,6 +64,9 @@ public class DataPacketEidReplacer {
                 if (sedp.eid == from) sedp.eid = to;
                 sedp.metadata = replaceMetadata(sedp.metadata, from, to);
                 break;
+            case ProtocolInfo.UPDATE_ATTRIBUTES_PACKET:
+                if (((UpdateAttributesPacket) packet).entityId == from) ((UpdateAttributesPacket) packet).entityId = to;
+                break;
             case ProtocolInfo.ENTITY_EVENT_PACKET:
                 if (((EntityEventPacket) packet).eid == from) ((EntityEventPacket) packet).eid = to;
                 break;

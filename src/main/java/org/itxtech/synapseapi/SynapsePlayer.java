@@ -174,7 +174,6 @@ public class SynapsePlayer extends Player {
         }
 
         this.sendPlayStatus(PlayStatusPacket.LOGIN_SUCCESS);
-        this.server.onPlayerLogin(this);
 
         ListTag<DoubleTag> posList = nbt.getList("Pos", DoubleTag.class);
 

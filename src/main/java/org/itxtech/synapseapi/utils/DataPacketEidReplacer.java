@@ -3,7 +3,6 @@ package org.itxtech.synapseapi.utils;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.data.EntityData;
 import cn.nukkit.entity.data.EntityMetadata;
-import cn.nukkit.entity.data.LongEntityData;
 import cn.nukkit.network.protocol.*;
 import cn.nukkit.utils.MainLogger;
 import com.google.common.collect.Sets;
@@ -70,6 +69,9 @@ public class DataPacketEidReplacer {
             case ProtocolInfo.ENTITY_EVENT_PACKET:
                 if (((EntityEventPacket) packet).eid == from) ((EntityEventPacket) packet).eid = to;
                 break;
+            case ProtocolInfo.MOVE_ENTITY_DELTA_PACKET:
+                if (((MoveEntityDeltaPacket) packet).eid == from) ((MoveEntityDeltaPacket) packet).eid = to;
+                break;
             case ProtocolInfo.MOVE_PLAYER_PACKET:
                 if (((MovePlayerPacket) packet).eid == from) ((MovePlayerPacket) packet).eid = to;
                 break;
@@ -97,6 +99,9 @@ public class DataPacketEidReplacer {
             case ProtocolInfo.UPDATE_EQUIPMENT_PACKET:
                 if (((UpdateEquipmentPacket) packet).eid == from) ((UpdateEquipmentPacket) packet).eid = to;
                 break;
+            case ProtocolInfo.CONTAINER_OPEN_PACKET:
+                if (((ContainerOpenPacket) packet).entityId == from) ((ContainerOpenPacket) packet).entityId = to;
+                break;
             default:
                 change = false;
         }
@@ -113,21 +118,7 @@ public class DataPacketEidReplacer {
 
         for (Integer key : replaceMetadata) {
             try {
-                @SuppressWarnings("rawtypes")
-                EntityData ed = data.get(key);
-
-                if (ed == null) {
-                    continue;
-                }
-
-                if (ed.getType() != Entity.DATA_TYPE_LONG) {
-                    MainLogger.getLogger().info("Wrong entity data type (" + key + ") expected 'Long' got '" + dataTypeToString(ed.getType()) + "'");
-                    continue;
-                }
-
-                long value = ((LongEntityData) ed).getData();
-
-                if (value == from) {
+                if (data.getLong(key) == from) {
                     if (!changed) {
                         data = cloneMetadata(data);
                         changed = true;
@@ -152,30 +143,5 @@ public class DataPacketEidReplacer {
         }
 
         return newData;
-    }
-
-    private static String dataTypeToString(int type) {
-        switch (type) {
-            case Entity.DATA_TYPE_BYTE:
-                return "Byte";
-            case Entity.DATA_TYPE_SHORT:
-                return "Short";
-            case Entity.DATA_TYPE_INT:
-                return "Int";
-            case Entity.DATA_TYPE_FLOAT:
-                return "Float";
-            case Entity.DATA_TYPE_STRING:
-                return "String";
-            case Entity.DATA_TYPE_SLOT:
-                return "Slot";
-            case Entity.DATA_TYPE_POS:
-                return "Pos";
-            case Entity.DATA_TYPE_LONG:
-                return "Long";
-            case Entity.DATA_TYPE_VECTOR3F:
-                return "Vector3f";
-        }
-
-        return "Unknown";
     }
 }

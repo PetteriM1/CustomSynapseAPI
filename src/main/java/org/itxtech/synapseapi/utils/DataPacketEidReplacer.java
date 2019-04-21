@@ -69,9 +69,6 @@ public class DataPacketEidReplacer {
             case ProtocolInfo.ENTITY_EVENT_PACKET:
                 if (((EntityEventPacket) packet).eid == from) ((EntityEventPacket) packet).eid = to;
                 break;
-            case ProtocolInfo.MOVE_ENTITY_DELTA_PACKET:
-                if (((MoveEntityDeltaPacket) packet).eid == from) ((MoveEntityDeltaPacket) packet).eid = to;
-                break;
             case ProtocolInfo.MOVE_PLAYER_PACKET:
                 if (((MovePlayerPacket) packet).eid == from) ((MovePlayerPacket) packet).eid = to;
                 break;

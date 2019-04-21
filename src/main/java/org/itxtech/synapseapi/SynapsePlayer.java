@@ -21,6 +21,7 @@ import cn.nukkit.utils.TextFormat;
 import org.itxtech.synapseapi.event.player.SynapsePlayerConnectEvent;
 import org.itxtech.synapseapi.event.player.SynapsePlayerTransferEvent;
 import org.itxtech.synapseapi.network.protocol.spp.PlayerLoginPacket;
+import org.itxtech.synapseapi.runnable.FastTransferHackRunnable;
 import org.itxtech.synapseapi.runnable.TransferRunnable;
 import org.itxtech.synapseapi.utils.ClientData;
 import org.itxtech.synapseapi.utils.ClientData.Entry;
@@ -206,7 +207,6 @@ public class SynapsePlayer extends Player {
         }
 
         this.sendPlayStatus(PlayStatusPacket.LOGIN_SUCCESS);
-        this.server.onPlayerLogin(this);
 
         ListTag<DoubleTag> posList = nbt.getList("Pos", DoubleTag.class);
 
@@ -387,6 +387,7 @@ public class SynapsePlayer extends Player {
             }
 
             new TransferRunnable(this, hash).run();
+            new FastTransferHackRunnable(this).run();
             return true;
         }
 

@@ -1,6 +1,7 @@
 package org.itxtech.synapseapi;
 
 import cn.nukkit.Player;
+import cn.nukkit.Server;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.event.EventHandler;
@@ -16,7 +17,6 @@ import org.itxtech.synapseapi.messaging.Messenger;
 import org.itxtech.synapseapi.messaging.StandardMessenger;
 import org.itxtech.synapseapi.utils.DataPacketEidReplacer;
 
-import javax.xml.bind.DatatypeConverter;
 import java.util.*;
 
 /**
@@ -48,6 +48,16 @@ public class SynapseAPI extends PluginBase implements Listener {
         this.getServer().getPluginManager().registerEvents(this, this);
         this.messenger = new StandardMessenger();
         loadEntries();
+
+        // HACK: Fix food bar
+        this.getServer().getScheduler().scheduleRepeatingTask(new cn.nukkit.scheduler.Task() {
+            @Override
+            public void onRun(int i) {
+                for (Player p : Server.getInstance().getOnlinePlayers().values()) {
+                    p.getFoodData().setLevel(p.getFoodData().getLevel());
+                }
+            }
+        }, 1, true);
     }
 
     public Map<String, SynapseEntry> getSynapseEntries() {

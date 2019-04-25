@@ -103,7 +103,7 @@ public class SynapseAPI extends PluginBase implements Listener {
         enable = this.getConfig().getBoolean("enable", true);
 
         if (!enable) {
-            this.getLogger().warning("The SynapseAPI is not be enabled!");
+            this.getLogger().warning("The SynapseAPI is not enabled!");
         } else {
             if (this.getConfig().getBoolean("disable-rak")) {
                 for (SourceInterface sourceInterface : this.getServer().getNetwork().getInterfaces()) {
@@ -174,25 +174,25 @@ public class SynapseAPI extends PluginBase implements Listener {
         HashMap<SynapseEntry, Map<Player, DataPacket[]>> map = new HashMap<>();
 
         for (Player p : players) {
-            if (p instanceof  SynapsePlayer) {
-                SynapsePlayer player = (SynapsePlayer) p;
-
-                SynapseEntry entry = player.getSynapseEntry();
-                Map<Player, DataPacket[]> playerPackets = map.get(entry);
-                if (playerPackets == null) {
-                    playerPackets = new HashMap<>();
-                }
-
-                DataPacket[] replaced = Arrays.stream(packets)
-                        .map(packet -> DataPacketEidReplacer.replace(packet, p.getId(), SynapsePlayer.REPLACE_ID))
-                        .toArray(DataPacket[]::new);
-
-                playerPackets.put(player, replaced);
-
-                map.put(entry, playerPackets);
-            } else {
-                e.setCancelled(false);
+            if (!(p instanceof SynapsePlayer)) {
+                continue;
             }
+
+            SynapsePlayer player = (SynapsePlayer) p;
+
+            SynapseEntry entry = player.getSynapseEntry();
+            Map<Player, DataPacket[]> playerPackets = map.get(entry);
+            if (playerPackets == null) {
+                playerPackets = new HashMap<>();
+            }
+
+            DataPacket[] replaced = Arrays.stream(packets)
+                    .map(packet -> DataPacketEidReplacer.replace(packet, p.getId(), SynapsePlayer.REPLACE_ID))
+                    .toArray(DataPacket[]::new);
+
+            playerPackets.put(player, replaced);
+
+            map.put(entry, playerPackets);
         }
 
         for (Map.Entry<SynapseEntry, Map<Player, DataPacket[]>> entry : map.entrySet()) {

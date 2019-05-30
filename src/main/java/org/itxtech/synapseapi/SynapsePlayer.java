@@ -26,6 +26,7 @@ import org.itxtech.synapseapi.utils.ClientData;
 import org.itxtech.synapseapi.utils.ClientData.Entry;
 import org.itxtech.synapseapi.utils.DataPacketEidReplacer;
 
+import java.net.InetSocketAddress;
 import java.util.*;
 
 /**
@@ -39,8 +40,8 @@ public class SynapsePlayer extends Player {
     protected SynapseEntry synapseEntry;
     private boolean isFirstTimeLogin = false;
 
-    public SynapsePlayer(SourceInterface interfaz, SynapseEntry synapseEntry, Long clientID, String ip, int port) {
-        super(interfaz, clientID, ip, port);
+    public SynapsePlayer(SourceInterface interfaz, SynapseEntry synapseEntry, Long clientID, InetSocketAddress address) {
+        super(interfaz, clientID, address);
         this.synapseEntry = synapseEntry;
         this.isSynapseLogin = this.synapseEntry != null;
     }
@@ -285,8 +286,8 @@ public class SynapsePlayer extends Player {
 
         this.server.getLogger().info(this.getServer().getLanguage().translateString("nukkit.player.logIn",
                 TextFormat.AQUA + this.username + TextFormat.WHITE,
-                this.ip,
-                String.valueOf(this.port),
+                this.getAddress(),
+                String.valueOf(this.getPort()),
                 String.valueOf(this.id),
                 this.level.getName(),
                 String.valueOf(NukkitMath.round(this.x, 4)),

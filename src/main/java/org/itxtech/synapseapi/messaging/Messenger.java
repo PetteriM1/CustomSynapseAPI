@@ -10,8 +10,8 @@ import java.util.Set;
  */
 public interface Messenger {
 
-    public static final int MAX_MESSAGE_SIZE = 32766;
-    public static final int MAX_CHANNEL_SIZE = 20;
+    int MAX_MESSAGE_SIZE = 32766;
+    int MAX_CHANNEL_SIZE = 20;
 
     boolean isReservedChannel(String channel);
 

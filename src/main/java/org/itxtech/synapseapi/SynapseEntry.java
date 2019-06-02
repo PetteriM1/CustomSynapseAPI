@@ -102,7 +102,7 @@ public class SynapseEntry {
             this.sendDataPacket(pk);
             try {
                 Thread.sleep(100);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException ignored) {
             }
         }
         if (this.synapseInterface != null) this.synapseInterface.shutdown();
@@ -279,15 +279,11 @@ public class SynapseEntry {
 
     public void removePlayer(SynapsePlayer player) {
         UUID uuid = player.getUniqueId();
-        if (this.players.containsKey(uuid)) {
-            this.players.remove(uuid);
-        }
+        this.players.remove(uuid);
     }
 
     public void removePlayer(UUID uuid) {
-        if (this.players.containsKey(uuid)) {
-            this.players.remove(uuid);
-        }
+        this.players.remove(uuid);
     }
 
     private final Queue<PlayerLoginPacket> playerLoginQueue = new LinkedBlockingQueue<>();

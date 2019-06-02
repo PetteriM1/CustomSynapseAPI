@@ -29,8 +29,6 @@ public class SynapseEntryPutPacketThread extends Thread {
 
     private final Queue<Map<Player, DataPacket[]>> broadcastQueue = new LinkedBlockingQueue<>();
 
-    private final boolean isAutoCompress = true;
-    private long tickUseTime = 0;
     private boolean isRunning = true;
 
     public SynapseEntryPutPacketThread(SynapseInterface synapseInterface) {
@@ -70,7 +68,7 @@ public class SynapseEntryPutPacketThread extends Thread {
                             entry.packet.encode();
                             entry.packet.isEncoded = true;
                         }
-                        if (!(entry.packet instanceof BatchPacket) && this.isAutoCompress) {
+                        if (!(entry.packet instanceof BatchPacket)) {
                             byte[] buffer = entry.packet.getBuffer();
                             try {
                                 buffer = Zlib.deflate(
@@ -119,11 +117,11 @@ public class SynapseEntryPutPacketThread extends Thread {
                 }
             }
 
-            tickUseTime = System.currentTimeMillis() - start;
+            long tickUseTime = System.currentTimeMillis() - start;
             if (tickUseTime < 10) {
                 try {
                     Thread.sleep(10 - tickUseTime);
-                } catch (InterruptedException e) {
+                } catch (InterruptedException ignored) {
                 }
             }
         }

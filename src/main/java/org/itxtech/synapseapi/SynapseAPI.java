@@ -53,9 +53,11 @@ public class SynapseAPI extends PluginBase implements Listener {
         this.getServer().getScheduler().scheduleRepeatingTask(new cn.nukkit.scheduler.Task() {
             @Override
             public void onRun(int i) {
-                for (Player p : Server.getInstance().getOnlinePlayers().values()) {
-                    p.getFoodData().setLevel(p.getFoodData().getLevel());
-                }
+                try {
+                    for (Player p : Server.getInstance().getOnlinePlayers().values()) {
+                        p.getFoodData().sendFoodLevel();
+                    }
+                } catch (Exception ignore) {}
             }
         }, 1, true);
     }
@@ -140,9 +142,15 @@ public class SynapseAPI extends PluginBase implements Listener {
             SynapsePlayer p = (SynapsePlayer) sender;
             if (cmd.getName().equalsIgnoreCase("transfer")) {
                 if (args.length > 0) {
-                    p.transferByDescription(args[0]);
+                    if (p.getSynapseEntry().getServerDescription().equals(args[0])) {
+                        p.sendMessage("\u00A7cYou are already on this server");
+                    } else {
+                        if (!p.transferByDescription(args[0])) {
+                            p.sendMessage("\u00A7cUnknown server");
+                        }
+                    }
                 } else {
-                    p.sendMessage("Usage: /transfer <description>");
+                    p.sendMessage("Usage: /transfer <target>");
                 }
             } else if (cmd.getName().equalsIgnoreCase("hub")) {
                 List<String> l = getConfig().getStringList("lobbies");

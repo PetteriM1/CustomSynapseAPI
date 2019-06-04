@@ -8,7 +8,7 @@ author: iTXTech, PetteriM1
 commands:
   transfer:
     description: Switch server
-    usage: "/transfer <description>"
+    usage: "/transfer <target>"
     permission: synapse.transfer
   hub:
     description: Transfer to lobby

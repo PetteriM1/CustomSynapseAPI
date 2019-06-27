@@ -50,16 +50,7 @@ public class SynapseAPI extends PluginBase implements Listener {
         loadEntries();
 
         // HACK: Fix food bar
-        this.getServer().getScheduler().scheduleRepeatingTask(new cn.nukkit.scheduler.Task() {
-            @Override
-            public void onRun(int i) {
-                try {
-                    for (Player p : Server.getInstance().getOnlinePlayers().values()) {
-                        p.getFoodData().sendFoodLevel();
-                    }
-                } catch (Exception ignore) {}
-            }
-        }, 1, true);
+        this.getServer().getScheduler().scheduleRepeatingTask(new FoodHack(), 1, true);
     }
 
     public Map<String, SynapseEntry> getSynapseEntries() {
@@ -209,6 +200,18 @@ public class SynapseAPI extends PluginBase implements Listener {
                     playerEntry.getKey().dataPacket(pk);
                 }
             }
+        }
+    }
+
+    private static class FoodHack extends cn.nukkit.scheduler.Task {
+
+        @Override
+        public void onRun(int i) {
+            try {
+                for (Player p : Server.getInstance().getOnlinePlayers().values()) {
+                    p.getFoodData().sendFoodLevel();
+                }
+            } catch (Exception ignore) {}
         }
     }
 }

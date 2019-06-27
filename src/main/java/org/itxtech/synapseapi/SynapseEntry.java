@@ -52,7 +52,7 @@ public class SynapseEntry {
         this.transferOnShutdown = transferOnShutdown;
         this.password = password;
         if (this.password.length() != 16) {
-            synapse.getLogger().warning("You must use a 16 bit length key!");
+            synapse.getLogger().warning("You must use a 16 keys long password!");
             synapse.getLogger().warning("This SynapseAPI Entry will not be enabled!");
             enable = false;
             return;
@@ -65,17 +65,6 @@ public class SynapseEntry {
         Thread ticker = new Thread(new AsyncTicker());
         ticker.setName("SynapseAPI Async Ticker");
         ticker.start();
-    }
-
-    public static String getRandomString(int length) {
-        String base = "abcdefghijklmnopqrstuvwxyz0123456789";
-        Random random = new Random();
-        StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < length; i++) {
-            int number = random.nextInt(base.length());
-            sb.append(base.charAt(number));
-        }
-        return sb.toString();
     }
 
     public SynapseAPI getSynapse() {
@@ -354,7 +343,7 @@ public class SynapseEntry {
         }
     }
 
-    private class RedirectPacketEntry {
+    private static class RedirectPacketEntry {
         private SynapsePlayer player;
         private DataPacket dataPacket;
 

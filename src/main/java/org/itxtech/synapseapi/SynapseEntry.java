@@ -1,6 +1,7 @@
 package org.itxtech.synapseapi;
 
 import cn.nukkit.Nukkit;
+import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.math.NukkitMath;
 import cn.nukkit.network.SourceInterface;
@@ -37,7 +38,7 @@ public class SynapseEntry {
     private boolean transferOnShutdown;
     private String password;
     private SynapseInterface synapseInterface;
-    private boolean verified = false;
+    private boolean verified;
     private long lastUpdate;
     private Map<UUID, SynapsePlayer> players = new HashMap<>();
     private SynLibInterface synLibInterface;
@@ -251,7 +252,8 @@ public class SynapseEntry {
             while ((playerLogoutPacket = playerLogoutQueue.poll()) != null) {
                 UUID uuid1;
                 if (players.containsKey(uuid1 = playerLogoutPacket.uuid)) {
-                    players.get(uuid1).close(playerLogoutPacket.reason, playerLogoutPacket.reason, true);
+                    Player player = players.get(uuid1);
+                    player.close(player.getLeaveMessage(), playerLogoutPacket.reason, true);
                     removePlayer(uuid1);
                 }
             }

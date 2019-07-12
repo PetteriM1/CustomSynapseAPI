@@ -1,0 +1,11 @@
+disable-rak: true
+enable: true
+
+entries:
+  - server-ip: 127.0.0.1
+    server-port: 10305
+    isLobbyServer: true
+    transferOnShutdown: true
+    password: must16keyslength
+    description: Synapse PocketMine Server
+    autoConnect: true

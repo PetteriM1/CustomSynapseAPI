@@ -84,7 +84,6 @@ modules.xml
 
 # End of https://www.gitignore.io/api/phpstorm+all
 
-config.yml
 .idea/
 PocketMine-MP.phar
 SynapsePM.iml

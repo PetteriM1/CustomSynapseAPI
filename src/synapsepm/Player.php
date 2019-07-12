@@ -4,16 +4,16 @@ declare(strict_types=1);
 namespace synapsepm;
 
 use pocketmine\level\Level;
-use pocketmine\network\mcpe\protocol\AvailableEntityIdentifiersPacket;
+use pocketmine\network\mcpe\protocol\AvailableActorIdentifiersPacket;
 use pocketmine\network\mcpe\protocol\DataPacket;
-use pocketmine\network\mcpe\protocol\EntityEventPacket;
+use pocketmine\network\mcpe\protocol\ActorEventPacket;
 use pocketmine\network\mcpe\protocol\FullChunkDataPacket;
 use pocketmine\network\mcpe\protocol\MobEffectPacket;
-use pocketmine\network\mcpe\protocol\MoveEntityAbsolutePacket;
+use pocketmine\network\mcpe\protocol\MoveActorAbsolutePacket;
 use pocketmine\network\mcpe\protocol\PlayStatusPacket;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\ResourcePacksInfoPacket;
-use pocketmine\network\mcpe\protocol\SetEntityMotionPacket;
+use pocketmine\network\mcpe\protocol\SetActorMotionPacket;
 use pocketmine\network\mcpe\protocol\StartGamePacket;
 use pocketmine\Player as PMPlayer;
 use pocketmine\utils\UUID;
@@ -108,7 +108,7 @@ class Player extends PMPlayer {
                 return true;
             }
 
-            if ($packet instanceof StartGamePacket || $packet instanceof AvailableEntityIdentifiersPacket) {
+            if ($packet instanceof StartGamePacket || $packet instanceof AvailableActorIdentifiersPacket) {
                 return true;
             }
         } else {
@@ -134,7 +134,7 @@ class Player extends PMPlayer {
     }
 
     public function broadcastEntityEvent(int $eventId, ?int $eventData = \null, ?array $players = \null): void {
-        $pk = new EntityEventPacket();
+        $pk = new ActorEventPacket();
         $pk->entityRuntimeId = $this->id;
         $pk->event = $eventId;
         $pk->data = $eventData ?? 0;
@@ -151,7 +151,7 @@ class Player extends PMPlayer {
     }
 
     protected function broadcastMotion(): void {
-        $pk = new SetEntityMotionPacket();
+        $pk = new SetActorMotionPacket();
         $pk->entityRuntimeId = PHP_INT_MAX;
         $pk->motion = $this->getMotion();
 
@@ -161,7 +161,7 @@ class Player extends PMPlayer {
     }
 
     protected function broadcastMovement(bool $teleport = false): void {
-        $pk = new MoveEntityAbsolutePacket();
+        $pk = new MoveActorAbsolutePacket();
         $pk->entityRuntimeId = PHP_INT_MAX;
         $pk->position = $this->getOffsetPosition($this);
         $pk->xRot = $this->pitch;
@@ -169,7 +169,7 @@ class Player extends PMPlayer {
         $pk->zRot = $this->yaw;
 
         if ($teleport) {
-            $pk->flags |= MoveEntityAbsolutePacket::FLAG_TELEPORT;
+            $pk->flags |= MoveActorAbsolutePacket::FLAG_TELEPORT;
         }
 
         $this->sendDataPacket($pk);
@@ -177,14 +177,14 @@ class Player extends PMPlayer {
         parent::broadcastMovement($teleport);
     }
 
-    public function handleEntityEvent(EntityEventPacket $packet): bool {
+    public function handleEntityEvent(ActorEventPacket $packet): bool {
         if (!$this->spawned or !$this->isAlive()) {
             return true;
         }
         $this->doCloseInventory();
 
         switch ($packet->event) {
-            case EntityEventPacket::EATING_ITEM:
+            case ActorEventPacket::EATING_ITEM:
                 if ($packet->data === 0) {
                     return false;
                 }

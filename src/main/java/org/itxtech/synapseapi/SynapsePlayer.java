@@ -274,6 +274,9 @@ public class SynapsePlayer extends Player {
         this.getServer().getScheduler().scheduleTask(null, () -> {
             try {
                 if (this.protocol >= 313) {
+                    if (this.protocol >= 361) {
+                        this.dataPacket(new BiomeDefinitionListPacket());
+                    }
                     this.dataPacket(new AvailableEntityIdentifiersPacket());
                 }
 

@@ -22,28 +22,28 @@ final class DataPacketEidReplacer {
 
         switch ($packet->pid()) {
             case ProtocolInfo::ADD_PLAYER_PACKET:
-            case ProtocolInfo::ADD_ENTITY_PACKET:
-            case ProtocolInfo::ADD_ITEM_ENTITY_PACKET:
+            case ProtocolInfo::ADD_ACTOR_PACKET:
+            case ProtocolInfo::ADD_ITEM_ACTOR_PACKET:
                 self::replaceMetadata($packet->metadata, $from, $to);
                 break;
             case ProtocolInfo::ANIMATE_PACKET:
-            case ProtocolInfo::SET_ENTITY_MOTION_PACKET:
+            case ProtocolInfo::SET_ACTOR_MOTION_PACKET:
             case ProtocolInfo::UPDATE_ATTRIBUTES_PACKET:
-            case ProtocolInfo::ENTITY_EVENT_PACKET:
+            case ProtocolInfo::ACTOR_EVENT_PACKET:
             case ProtocolInfo::MOB_EQUIPMENT_PACKET:
             case ProtocolInfo::MOB_EFFECT_PACKET:
-            case ProtocolInfo::MOVE_ENTITY_ABSOLUTE_PACKET:
+            case ProtocolInfo::MOVE_ACTOR_ABSOLUTE_PACKET:
             case ProtocolInfo::MOB_ARMOR_EQUIPMENT_PACKET:
                 if ($packet->entityRuntimeId === $from) {
                     $packet->entityRuntimeId = $to;
                 }
                 break;
-            case ProtocolInfo::TAKE_ITEM_ENTITY_PACKET:
+            case ProtocolInfo::TAKE_ITEM_ACTOR_PACKET:
                 if ($packet->eid === $from) {
                     $packet->eid = $to;
                 }
                 break;
-            case ProtocolInfo::SET_ENTITY_LINK_PACKET:
+            case ProtocolInfo::SET_ACTOR_LINK_PACKET:
                 $link = $packet->link;
 
                 if ($link->fromEntityUniqueId === $from) {
@@ -54,7 +54,7 @@ final class DataPacketEidReplacer {
                     $link->toEntityUniqueId = $to;
                 }
                 break;
-            case ProtocolInfo::SET_ENTITY_DATA_PACKET:
+            case ProtocolInfo::SET_ACTOR_DATA_PACKET:
                 if ($packet->entityRuntimeId === $from) {
                     $packet->entityRuntimeId = $to;
                 }

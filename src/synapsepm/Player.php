@@ -7,7 +7,7 @@ use pocketmine\level\Level;
 use pocketmine\network\mcpe\protocol\AvailableActorIdentifiersPacket;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\ActorEventPacket;
-use pocketmine\network\mcpe\protocol\FullChunkDataPacket;
+use pocketmine\network\mcpe\protocol\LevelChunkPacket;
 use pocketmine\network\mcpe\protocol\MobEffectPacket;
 use pocketmine\network\mcpe\protocol\MoveActorAbsolutePacket;
 use pocketmine\network\mcpe\protocol\PlayStatusPacket;
@@ -61,7 +61,7 @@ class Player extends PMPlayer {
     public function forceSendEmptyChunks() {
         foreach ($this->usedChunks as $index => $true) {
             Level::getXZ($index, $chunkX, $chunkZ);
-            $pk = new FullChunkDataPacket();
+            $pk = new LevelChunkPacket();
             $pk->chunkX = $chunkX;
             $pk->chunkZ = $chunkZ;
             $pk->data = '';

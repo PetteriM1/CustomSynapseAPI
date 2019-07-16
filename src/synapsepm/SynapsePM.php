@@ -6,6 +6,7 @@ namespace synapsepm;
 use pocketmine\network\mcpe\protocol\types\RuntimeBlockMapping;
 use pocketmine\plugin\PluginBase;
 use synapsepm\command\TransferCommand;
+use synapsepm\utils\Utils;
 
 
 class SynapsePM extends PluginBase {
@@ -13,6 +14,11 @@ class SynapsePM extends PluginBase {
     private $synapses = [];
     /** @var bool */
     private $useLoadingScreen;
+
+    public function onLoad() {
+        @RuntimeBlockMapping::fromStaticRuntimeId(0);
+        Utils::initBlockRuntimeIdMapping();
+    }
 
     public function onEnable() {
         $this->saveDefaultConfig();

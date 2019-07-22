@@ -32,9 +32,8 @@ class Utils {
                     ]
                 ]
             )), true);
-            foreach($runtimeIdMap as $id){
-				$id["legacy_id"] = $id["id"];
-			}
+
+
             $bedrockKnownStates->setValue($runtimeIdMap);
             $runtimeToLegacyMap->setValue([]);
             $legacyToRuntimeMap->setValue([]);

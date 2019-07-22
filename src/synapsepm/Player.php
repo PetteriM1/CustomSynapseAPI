@@ -61,7 +61,7 @@ class Player extends PMPlayer {
     public function forceSendEmptyChunks() {
         foreach ($this->usedChunks as $index => $true) {
             Level::getXZ($index, $chunkX, $chunkZ);
-            $pk = LevelChunkPacket::withoutCache($chunkX, $chunkZ, 0, "");
+            $pk = LevelChunkPacket::withoutCache($chunkX, $chunkZ, 16, '');
             $this->dataPacket($pk);
         }
     }

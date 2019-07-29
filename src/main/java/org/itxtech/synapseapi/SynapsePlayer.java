@@ -40,7 +40,7 @@ public class SynapsePlayer extends Player {
 
     public boolean isSynapseLogin;
     protected SynapseEntry synapseEntry;
-    private boolean isFirstTimeLogin = false;
+    private boolean isFirstTimeLogin;
 
     public SynapsePlayer(SourceInterface interfaz, SynapseEntry synapseEntry, Long clientID, String ip, int port) {
         super(interfaz, clientID, ip, port);
@@ -327,10 +327,10 @@ public class SynapsePlayer extends Player {
     protected void forceSendEmptyChunks() {
         int chunkPositionX = this.getFloorX() >> 4;
         int chunkPositionZ = this.getFloorZ() >> 4;
-        List<FullChunkDataPacket> pkList = new ArrayList<>();
+        List<LevelChunkPacket> pkList = new ArrayList<>();
         for (int x = -3; x < 3; x++) {
             for (int z = -3; z < 3; z++) {
-                FullChunkDataPacket chunk = new FullChunkDataPacket();
+                LevelChunkPacket chunk = new LevelChunkPacket();
                 chunk.chunkX = chunkPositionX + x;
                 chunk.chunkZ = chunkPositionZ + z;
                 chunk.data = new byte[0];

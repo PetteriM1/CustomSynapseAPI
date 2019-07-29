@@ -18,6 +18,8 @@ import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.*;
 import cn.nukkit.network.SourceInterface;
 import cn.nukkit.network.protocol.*;
+import cn.nukkit.network.protocol.types.ContainerIds;
+import cn.nukkit.utils.MainLogger;
 import cn.nukkit.utils.TextFormat;
 import org.itxtech.synapseapi.event.player.SynapsePlayerConnectEvent;
 import org.itxtech.synapseapi.event.player.SynapsePlayerTransferEvent;
@@ -303,14 +305,10 @@ public class SynapsePlayer extends Player {
 
         this.getServer().getScheduler().scheduleTask(null, () -> {
             try {
-                if (this.protocol >= 313) {
-                    if (this.protocol >= 361) {
-                        this.dataPacket(new BiomeDefinitionListPacket());
-                    }
-                    this.dataPacket(new AvailableEntityIdentifiersPacket());
-                }
+                this.dataPacket(new BiomeDefinitionListPacket());
+                this.dataPacket(new AvailableEntityIdentifiersPacket());
 
-                if (this.isOp() || this.hasPermission("nukkit.textcolor") || this.server.suomiCraftPEMode()) {
+                if (this.isOp() || this.hasPermission("nukkit.textcolor")) {
                     this.setRemoveFormat(false);
                 }
 
@@ -357,10 +355,10 @@ public class SynapsePlayer extends Player {
     protected void forceSendEmptyChunks() {
         int chunkPositionX = this.getFloorX() >> 4;
         int chunkPositionZ = this.getFloorZ() >> 4;
-        List<FullChunkDataPacket> pkList = new ArrayList<>();
+        List<LevelChunkPacket> pkList = new ArrayList<>();
         for (int x = -3; x < 3; x++) {
             for (int z = -3; z < 3; z++) {
-                FullChunkDataPacket chunk = new FullChunkDataPacket();
+                LevelChunkPacket chunk = new LevelChunkPacket();
                 chunk.chunkX = chunkPositionX + x;
                 chunk.chunkZ = chunkPositionZ + z;
                 chunk.data = new byte[0];

@@ -46,7 +46,7 @@ public class SynapsePlayer extends Player {
 
     public boolean isSynapseLogin;
     protected SynapseEntry synapseEntry;
-    private boolean isFirstTimeLogin = false;
+    private boolean isFirstTimeLogin;
 
     static {
         try {

@@ -346,10 +346,6 @@ public class SynapsePlayer extends Player {
         ChunkRadiusUpdatedPacket chunkRadiusUpdatePacket = new ChunkRadiusUpdatedPacket();
         chunkRadiusUpdatePacket.radius = this.chunkRadius;
         this.dataPacket(chunkRadiusUpdatePacket);
-
-        if (!isFirstTimeLogin) {
-            this.doFirstSpawn();
-        }
     }
 
     protected void forceSendEmptyChunks() {

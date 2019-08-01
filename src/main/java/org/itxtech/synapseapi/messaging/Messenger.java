@@ -10,9 +10,6 @@ import java.util.Set;
  */
 public interface Messenger {
 
-    int MAX_MESSAGE_SIZE = 32766;
-    int MAX_CHANNEL_SIZE = 20;
-
     boolean isReservedChannel(String channel);
 
     void registerOutgoingPluginChannel(Plugin plugin, String channel);

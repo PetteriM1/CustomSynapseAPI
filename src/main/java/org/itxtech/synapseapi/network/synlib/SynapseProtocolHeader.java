@@ -11,11 +11,6 @@ package org.itxtech.synapseapi.network.synlib;
 public class SynapseProtocolHeader {
 
     /**
-     * Head Length
-     */
-    public static final int HEAD_LENGTH = 7;
-
-    /**
      * Magic
      */
     public static final short MAGIC = (short) 0xbabe;
@@ -38,5 +33,4 @@ public class SynapseProtocolHeader {
     public void bodyLength(int bodyLength) {
         this.bodyLength = bodyLength;
     }
-
 }

@@ -16,7 +16,7 @@ public class SynapseInterface {
     private static Map<Byte, SynapseDataPacket> packetPool = new HashMap<>();
     private SynapseEntry synapse;
     private SynapseClient client;
-    private boolean connected = false;
+    private boolean connected;
 
     public SynapseInterface(SynapseEntry server, String ip, int port) {
         this.synapse = server;

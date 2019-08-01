@@ -10,10 +10,6 @@ package org.itxtech.synapseapi.network.synlib;
 @SuppressWarnings("serial")
 public class SynapseContextException extends Exception {
 
-    public SynapseContextException() {
-        super();
-    }
-
     public SynapseContextException(String message) {
         super(message);
     }
@@ -25,5 +21,4 @@ public class SynapseContextException extends Exception {
     public SynapseContextException(Throwable cause) {
         super(cause);
     }
-
 }

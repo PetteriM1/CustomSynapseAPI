@@ -13,7 +13,7 @@ public class Session {
     private SynapseClient client;
     private long lastCheck;
     private boolean connected;
-    private long tickUseTime = 0;
+    private long tickUseTime;
 
     public Session(SynapseClient client) {
         this.client = client;
@@ -126,7 +126,6 @@ public class Session {
     public float getTicksPerSecond() {
         long more = this.tickUseTime - 10;
         if (more < 0) return 100;
-        return Math.round(10f / (float) this.tickUseTime) * 100;
+        return Math.round(10f / this.tickUseTime) * 100;
     }
-
 }

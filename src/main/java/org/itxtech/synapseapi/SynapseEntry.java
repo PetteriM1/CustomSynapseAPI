@@ -38,7 +38,7 @@ public class SynapseEntry {
     private boolean transferOnShutdown;
     private String password;
     private SynapseInterface synapseInterface;
-    private boolean verified = false;
+    private boolean verified;
     private long lastUpdate;
     private Map<UUID, SynapsePlayer> players = new HashMap<>();
     private SynLibInterface synLibInterface;
@@ -92,8 +92,7 @@ public class SynapseEntry {
             this.sendDataPacket(pk);
             try {
                 Thread.sleep(100);
-            } catch (InterruptedException ignored) {
-            }
+            } catch (InterruptedException ignored) {}
         }
         if (this.synapseInterface != null) this.synapseInterface.shutdown();
     }
@@ -174,7 +173,7 @@ public class SynapseEntry {
 
     public class AsyncTicker implements Runnable {
         private long tickUseTime;
-        private long lastWarning = 0;
+        private long lastWarning;
 
         @Override
         public void run() {

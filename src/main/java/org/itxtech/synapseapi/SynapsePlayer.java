@@ -19,7 +19,6 @@ import cn.nukkit.nbt.tag.*;
 import cn.nukkit.network.SourceInterface;
 import cn.nukkit.network.protocol.*;
 import cn.nukkit.network.protocol.types.ContainerIds;
-import cn.nukkit.utils.MainLogger;
 import cn.nukkit.utils.TextFormat;
 import org.itxtech.synapseapi.event.player.SynapsePlayerConnectEvent;
 import org.itxtech.synapseapi.event.player.SynapsePlayerTransferEvent;
@@ -110,31 +109,32 @@ public class SynapsePlayer extends Player {
             return;
         }
 
+        Player oldPlayer = null;
         for (Player p : new ArrayList<>(this.server.getOnlinePlayers().values())) {
-            if (p != this && p.getName() != null && p.getName().equalsIgnoreCase(this.getName())) {
-                if (!p.kick(PlayerKickEvent.Reason.NEW_CONNECTION, "logged in from another location")) {
-                    this.close(this.getLeaveMessage(), "Already connected");
-                    return;
-                }
-            } else if (p.loggedIn && this.getUniqueId().equals(p.getUniqueId())) {
-                if (!p.kick(PlayerKickEvent.Reason.NEW_CONNECTION, "logged in from another location")) {
-                    this.close(this.getLeaveMessage(), "Already connected");
-                    return;
-                }
+            if (p != this && p.getName() != null && p.getName().equalsIgnoreCase(this.getName()) ||
+                    this.getUniqueId().equals(p.getUniqueId())) {
+                oldPlayer = p;
+                break;
             }
         }
 
         CompoundTag nbt;
-        File legacyDataFile = new File(server.getDataPath() + "players/" + this.username.toLowerCase() + ".dat");
-        File dataFile = new File(server.getDataPath() + "players/" + this.uuid.toString() + ".dat");
-        if (legacyDataFile.exists() && !dataFile.exists()) {
-            nbt = this.server.getOfflinePlayerData(this.username);
-
-            if (!legacyDataFile.delete()) {
-                MainLogger.getLogger().warning("Could not delete legacy player data for " + this.username);
-            }
+        if (oldPlayer != null) {
+            oldPlayer.saveNBT();
+            nbt = oldPlayer.namedTag;
+            oldPlayer.close("", "disconnectionScreen.loggedinOtherLocation");
         } else {
-            nbt = this.server.getOfflinePlayerData(this.uuid);
+            File legacyDataFile = new File(server.getDataPath() + "players/" + this.username.toLowerCase() + ".dat");
+            File dataFile = new File(server.getDataPath() + "players/" + this.uuid + ".dat");
+            if (legacyDataFile.exists() && !dataFile.exists()) {
+                nbt = this.server.getOfflinePlayerData(this.username, false);
+
+                if (!legacyDataFile.delete()) {
+                    this.server.getLogger().alert("Could not delete legacy player data for " + this.username);
+                }
+            } else {
+                nbt = this.server.getOfflinePlayerData(this.uuid, true);
+            }
         }
 
         if (nbt == null) {

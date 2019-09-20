@@ -45,6 +45,11 @@ public class SynapseAPI extends PluginBase implements Listener {
 
     @Override
     public void onEnable() {
+        if (!getServer().getName().equals("Nukkit PetteriM1 Edition")) {
+            getServer().getLogger().error("This build of SynapseAPI can only be used on Nukkit PetteriM1 Edition. Please download correct build.");
+            getServer().getPluginManager().disablePlugin(this);
+        }
+
         this.getServer().getPluginManager().registerEvents(this, this);
         this.messenger = new StandardMessenger();
         loadEntries();

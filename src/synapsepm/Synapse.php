@@ -137,7 +137,7 @@ class Synapse {
     public function connect() {
         $this->verified = false;
         $pk = new ConnectPacket();
-        $pk->password = $this->password;
+        $pk->password = md5($this->password);
         $pk->islobbyServer = $this->lobbyServer;
         $pk->transferOnShutdown = $this->transferOnShutdown;
         $pk->description = $this->description;

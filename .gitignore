@@ -87,3 +87,4 @@ modules.xml
 .idea/
 PocketMine-MP.phar
 SynapsePM.iml
+target/

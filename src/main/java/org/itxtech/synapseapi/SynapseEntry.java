@@ -12,6 +12,7 @@ import cn.nukkit.plugin.Plugin;
 import cn.nukkit.utils.Binary;
 import cn.nukkit.utils.BinaryStream;
 import cn.nukkit.utils.Zlib;
+import com.google.common.hash.Hashing;
 import com.google.gson.Gson;
 import org.itxtech.synapseapi.event.player.SynapsePlayerCreationEvent;
 import org.itxtech.synapseapi.messaging.StandardMessenger;
@@ -22,6 +23,7 @@ import org.itxtech.synapseapi.utils.ClientData;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -162,7 +164,7 @@ public class SynapseEntry {
         this.getSynapse().getLogger().notice("Connecting " + this.getHash());
         this.verified = false;
         ConnectPacket pk = new ConnectPacket();
-        pk.password = this.password;
+        pk.password = Hashing.md5().hashBytes(this.password.getBytes(StandardCharsets.UTF_8)).toString();
         pk.isLobbyServer = this.isLobbyServer();
         pk.isLobbyServer = isLobbyServer;
         pk.transferShutdown = transferOnShutdown;

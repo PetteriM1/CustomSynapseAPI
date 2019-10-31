@@ -1,7 +1,7 @@
 package org.itxtech.synapseapi.network.synlib;
 
 import cn.nukkit.Server;
-import cn.nukkit.utils.ThreadedLogger;
+import cn.nukkit.utils.MainLogger;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
@@ -19,7 +19,7 @@ public class SynapseClient extends Thread {
     public boolean needReconnect;
     protected ConcurrentLinkedQueue<SynapseDataPacket> externalQueue;
     protected ConcurrentLinkedQueue<SynapseDataPacket> internalQueue;
-    private ThreadedLogger logger;
+    private MainLogger logger;
     private String interfaz;
     private int port;
     private boolean shutdown;
@@ -28,11 +28,11 @@ public class SynapseClient extends Thread {
     private EventLoopGroup clientGroup;
     private Session session;
 
-    public SynapseClient(ThreadedLogger logger, int port) {
+    public SynapseClient(MainLogger logger, int port) {
         this(logger, port, "127.0.0.1");
     }
 
-    public SynapseClient(ThreadedLogger logger, int port, String interfaz) {
+    public SynapseClient(MainLogger logger, int port, String interfaz) {
         this.logger = logger;
         this.interfaz = interfaz;
         this.port = port;
@@ -90,7 +90,7 @@ public class SynapseClient extends Thread {
         return interfaz;
     }
 
-    public ThreadedLogger getLogger() {
+    public MainLogger getLogger() {
         return logger;
     }
 

@@ -369,16 +369,6 @@ public class SynapsePlayer extends Player {
         return false;
     }
 
-    @Override
-    public void handleDataPacket(DataPacket packet) {
-        if (!this.isSynapseLogin) {
-            super.handleDataPacket(packet);
-            return;
-        }
-
-        super.handleDataPacket(packet);
-    }
-
     public void setUniqueId(UUID uuid) {
         this.uuid = uuid;
     }

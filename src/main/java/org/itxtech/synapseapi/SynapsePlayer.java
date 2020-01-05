@@ -19,6 +19,7 @@ import cn.nukkit.nbt.tag.*;
 import cn.nukkit.network.SourceInterface;
 import cn.nukkit.network.protocol.*;
 import cn.nukkit.network.protocol.types.ContainerIds;
+import cn.nukkit.potion.Effect;
 import cn.nukkit.utils.TextFormat;
 import org.itxtech.synapseapi.event.player.SynapsePlayerConnectEvent;
 import org.itxtech.synapseapi.event.player.SynapsePlayerTransferEvent;
@@ -384,12 +385,23 @@ public class SynapsePlayer extends Player {
                 return false;
             }
 
+            this.hideEffects();
             new TransferRunnable(this, hash).run();
             new FastTransferHackRunnable(this).run();
             return true;
         }
 
         return false;
+    }
+
+    private void hideEffects() {
+        for (Effect e : this.getEffects().values()) {
+            MobEffectPacket pk = new MobEffectPacket();
+            pk.eid = this.getId();
+            pk.effectId = e.getId();
+            pk.eventId = MobEffectPacket.EVENT_REMOVE;
+            this.dataPacket(pk);
+        }
     }
 
     @Override

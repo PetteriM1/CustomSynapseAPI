@@ -10,6 +10,10 @@ commands:
     description: Switch server
     usage: "/transfer <target>"
     permission: synapse.transfer
+  srv:
+    description: Switch server
+    usage: "/srv <target>"
+    permission: synapse.transfer
   hub:
     description: Transfer to lobby
     usage: "/hub"

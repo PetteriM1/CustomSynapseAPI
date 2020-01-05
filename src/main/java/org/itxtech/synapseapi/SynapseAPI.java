@@ -131,7 +131,8 @@ public class SynapseAPI extends PluginBase implements Listener {
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
         if (sender instanceof SynapsePlayer) {
             SynapsePlayer p = (SynapsePlayer) sender;
-            if (cmd.getName().equalsIgnoreCase("transfer")) {
+            String c = cmd.getName();
+            if (c.equalsIgnoreCase("transfer") || c.equalsIgnoreCase("srv")) {
                 if (args.length > 0) {
                     if (p.getSynapseEntry().getServerDescription().equals(args[0])) {
                         p.sendMessage("\u00A7cYou are already on this server");
@@ -143,7 +144,7 @@ public class SynapseAPI extends PluginBase implements Listener {
                 } else {
                     p.sendMessage("Usage: /transfer <target>");
                 }
-            } else if (cmd.getName().equalsIgnoreCase("hub")) {
+            } else if (c.equalsIgnoreCase("hub")) {
                 List<String> l = getConfig().getStringList("lobbies");
                 if (l.size() == 0) return true;
                 if (!l.contains(p.getSynapseEntry().getServerDescription()) && !p.getSynapseEntry().isLobbyServer()) {

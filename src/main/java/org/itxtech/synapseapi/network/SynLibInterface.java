@@ -1,6 +1,7 @@
 package org.itxtech.synapseapi.network;
 
 import cn.nukkit.Player;
+import cn.nukkit.Server;
 import cn.nukkit.network.SourceInterface;
 import cn.nukkit.network.protocol.BatchPacket;
 import cn.nukkit.network.protocol.DataPacket;
@@ -48,7 +49,11 @@ public class SynLibInterface implements SourceInterface {
         pk.direct = immediate;
         pk.mcpeBuffer = packet instanceof BatchPacket ? Binary.appendBytes((byte) 0xfe, ((BatchPacket) packet).payload) : packet.getBuffer();
 
-        this.synapseInterface.putPacket(pk);
+        if (pk.mcpeBuffer.length >= 5242880) {
+            Server.getInstance().getLogger().error("[Synapse] Too big packet!");
+        } else {
+            this.synapseInterface.putPacket(pk);
+        }
         return 0;
     }
 

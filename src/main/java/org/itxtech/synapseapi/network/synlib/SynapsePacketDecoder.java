@@ -1,6 +1,5 @@
 package org.itxtech.synapseapi.network.synlib;
 
-import cn.nukkit.Server;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ReplayingDecoder;
@@ -16,8 +15,6 @@ import java.util.List;
  * ===============
  */
 public class SynapsePacketDecoder extends ReplayingDecoder<SynapsePacketDecoder.State> {
-
-    private static final int MAX_BODY_SIZE = 1024 * 1024 * 5;
 
     private final SynapseProtocolHeader header = new SynapseProtocolHeader();
 
@@ -50,21 +47,19 @@ public class SynapsePacketDecoder extends ReplayingDecoder<SynapsePacketDecoder.
     }
 
     private int checkBodyLength(int bodyLength) throws SynapseContextException {
-        if (bodyLength > MAX_BODY_SIZE) {
-            throw new SynapseContextException("body of request is bigger than limit value " + MAX_BODY_SIZE);
+        if (bodyLength > 5242880) {
+            throw new SynapseContextException("Body of request is bigger than limit value 5242880");
         }
         return bodyLength;
     }
 
     private void checkMagic(short magic) throws SynapseContextException {
         if (SynapseProtocolHeader.MAGIC != magic) {
-            Server.getInstance().getLogger().error("Magic is not match");
-            throw new SynapseContextException("magic value is not equal " + SynapseProtocolHeader.MAGIC);
+            throw new SynapseContextException("Magic value is not equal -17730");
         }
     }
 
     enum State {
         HEADER_MAGIC, HEADER_ID, HEADER_BODY_LENGTH, BODY
     }
-
 }

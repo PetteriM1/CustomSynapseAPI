@@ -1,7 +1,4 @@
-disable-rak: true
-enable: true
-
-lobbies: 
+lobbies:
   - "lobby"
 
 entries:
@@ -11,4 +8,3 @@ entries:
     transferOnShutdown: true
     password: must16keyslength
     description: Synapse Nukkit Server
-    autoConnect: true

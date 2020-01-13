@@ -148,7 +148,7 @@ public class SynapseClient extends Thread {
             return true;
         } catch (Exception e) {
             clientGroup.shutdownGracefully();
-            Server.getInstance().getLogger().alert("Synapse Client can't connect to server: " + this.interfaz + ":" + this.port);
+            Server.getInstance().getLogger().alert("Synapse Client can't connect to server: " + this.interfaz + ':' + this.port);
             this.reconnect();
             return false;
         }
@@ -165,5 +165,4 @@ public class SynapseClient extends Thread {
             }
         }
     }
-
 }

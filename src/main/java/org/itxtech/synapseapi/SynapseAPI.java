@@ -24,9 +24,7 @@ import java.util.*;
  */
 public class SynapseAPI extends PluginBase implements Listener {
 
-    public static boolean enable = true;
     private static SynapseAPI instance;
-    private boolean autoConnect = true;
     private Map<String, SynapseEntry> synapseEntries = new HashMap<>();
     private Messenger messenger;
 
@@ -34,20 +32,13 @@ public class SynapseAPI extends PluginBase implements Listener {
         return instance;
     }
 
-    public boolean isAutoConnect() {
-        return autoConnect;
-    }
-
-    @Override
-    public void onLoad() {
-        instance = this;
-    }
-
     @Override
     public void onEnable() {
+        instance = this;
+
         this.getServer().getPluginManager().registerEvents(this, this);
         this.messenger = new StandardMessenger();
-        loadEntries();
+        this.loadEntries();
 
         // HACK: Fix food bar
         this.getServer().getScheduler().scheduleRepeatingTask(new FoodHack(), 1, true);
@@ -77,50 +68,37 @@ public class SynapseAPI extends PluginBase implements Listener {
     }
 
     public DataPacket getPacket(byte[] buffer) {
-        byte pid = buffer[0] == (byte) 0xfe ? (byte) 0xff : buffer[0];
-
-        byte start = 1;
-        DataPacket data;
-        data = this.getServer().getNetwork().getPacket(pid);
+        DataPacket data = this.getServer().getNetwork().getPacket(buffer[0] == (byte) 0xfe ? (byte) 0xff : buffer[0]);
 
         if (data == null) {
             return null;
         }
-        data.setBuffer(buffer, start);
+
+        data.setBuffer(buffer, 1);
         return data;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void loadEntries() {
         this.saveDefaultConfig();
-        enable = this.getConfig().getBoolean("enable", true);
 
-        if (!enable) {
-            this.getLogger().warning("The SynapseAPI is not enabled!");
-        } else {
-            if (this.getConfig().getBoolean("disable-rak")) {
-                for (SourceInterface sourceInterface : this.getServer().getNetwork().getInterfaces()) {
-                    if (sourceInterface instanceof RakNetInterface) {
-                        sourceInterface.shutdown();
-                    }
-                }
+        for (SourceInterface sourceInterface : this.getServer().getNetwork().getInterfaces()) {
+            if (sourceInterface instanceof RakNetInterface) {
+                sourceInterface.shutdown();
             }
+        }
 
-            List entries = this.getConfig().getList("entries");
+        List entries = this.getConfig().getList("entries");
 
-            for (Object entry : entries) {
-                ConfigSection section = new ConfigSection((LinkedHashMap) entry);
-                String serverIp = section.getString("server-ip", "127.0.0.1");
-                int port = section.getInt("server-port", 10305);
-                boolean isLobbyServer = section.getBoolean("isLobbyServer");
-                boolean transfer = section.getBoolean("transferOnShutdown", true);
-                String password = section.getString("password");
-                String serverDescription = section.getString("description");
-                this.autoConnect = section.getBoolean("autoConnect", true);
-                if (this.autoConnect) {
-                    this.addSynapseAPI(new SynapseEntry(this, serverIp, port, isLobbyServer, transfer, password, serverDescription));
-                }
-            }
+        for (Object entry : entries) {
+            ConfigSection section = new ConfigSection((LinkedHashMap) entry);
+            String serverIp = section.getString("server-ip", "127.0.0.1");
+            int port = section.getInt("server-port", 10305);
+            boolean isLobbyServer = section.getBoolean("isLobbyServer");
+            boolean transfer = section.getBoolean("transferOnShutdown", true);
+            String password = section.getString("password");
+            String serverDescription = section.getString("description");
+            this.addSynapseAPI(new SynapseEntry(this, serverIp, port, isLobbyServer, transfer, password, serverDescription));
         }
     }
 
@@ -131,8 +109,8 @@ public class SynapseAPI extends PluginBase implements Listener {
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
         if (sender instanceof SynapsePlayer) {
             SynapsePlayer p = (SynapsePlayer) sender;
-            String c = cmd.getName();
-            if (c.equalsIgnoreCase("transfer") || c.equalsIgnoreCase("srv")) {
+            String c = cmd.getName().toLowerCase();
+            if (c.equals("transfer") || c.equals("srv")) {
                 if (args.length > 0) {
                     if (p.getSynapseEntry().getServerDescription().equals(args[0])) {
                         p.sendMessage("\u00A7cYou are already on this server");
@@ -142,13 +120,13 @@ public class SynapseAPI extends PluginBase implements Listener {
                         }
                     }
                 } else {
-                    p.sendMessage("Usage: /transfer <target>");
+                    return false;
                 }
-            } else if (c.equalsIgnoreCase("hub")) {
+            } else if (c.equals("hub") || c.equals("lobby")) {
                 List<String> l = getConfig().getStringList("lobbies");
                 if (l.size() == 0) return true;
                 if (!l.contains(p.getSynapseEntry().getServerDescription()) && !p.getSynapseEntry().isLobbyServer()) {
-                    p.transferByDescription(l.get(new Random().nextInt(l.size())));
+                    p.transferByDescription(l.get(new SplittableRandom().nextInt(l.size())));
                 } else {
                     p.sendMessage("\u00A7cYou are already on a lobby server");
                 }
@@ -167,7 +145,7 @@ public class SynapseAPI extends PluginBase implements Listener {
 
     @EventHandler
     public void onBatchPackets(BatchPacketsEvent e) {
-        e.setCancelled();
+        e.setCancelled(true);
         Player[] players = e.getPlayers();
 
         DataPacket[] packets = e.getPackets();
@@ -210,7 +188,10 @@ public class SynapseAPI extends PluginBase implements Listener {
         public void onRun(int i) {
             try {
                 for (Player p : Server.getInstance().getOnlinePlayers().values()) {
-                    p.getFoodData().sendFoodLevel();
+                    int g = p.getGamemode();
+                    if (g == 0 || g == 2) {
+                        p.getFoodData().sendFoodLevel();
+                    }
                 }
             } catch (Exception ignore) {}
         }

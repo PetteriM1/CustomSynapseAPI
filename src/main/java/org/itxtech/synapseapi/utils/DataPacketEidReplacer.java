@@ -124,7 +124,7 @@ public class DataPacketEidReplacer {
                     data.putLong(key, to);
                 }
             } catch (Exception e) {
-                MainLogger.getLogger().error("Exception while replacing metadata '" + key + "'", e);
+                MainLogger.getLogger().error("Exception while replacing metadata '" + key + '\'', e);
             }
         }
 

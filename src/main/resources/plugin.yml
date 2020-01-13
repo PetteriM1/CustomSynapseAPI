@@ -1,7 +1,7 @@
 name: SynapseAPI
 main: org.itxtech.synapseapi.SynapseAPI
-version: "3.0"
-api: ["1.0.0"]
+version: "PM1E"
+api: "1.0.9"
 load: STARTUP
 author: iTXTech, PetteriM1
 
@@ -18,10 +18,14 @@ commands:
     description: Transfer to lobby
     usage: "/hub"
     permission: synapse.transfer.hub
+  lobby:
+    description: Transfer to lobby
+    usage: "/lobby"
+    permission: synapse.transfer.hub
 permissions:
   synapse.transfer:
     description: "Allows player to transfer to other server"
     default: true
   synapse.transfer.hub:
-    description: "Allows player to use /hub"
+    description: "Allows player to transfer to lobby"
     default: true

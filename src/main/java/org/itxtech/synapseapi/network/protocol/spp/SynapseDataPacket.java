@@ -34,5 +34,4 @@ public abstract class SynapseDataPacket extends BinaryStream implements Cloneabl
             return null;
         }
     }
-
 }

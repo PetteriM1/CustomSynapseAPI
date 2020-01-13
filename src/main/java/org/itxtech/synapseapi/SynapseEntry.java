@@ -33,7 +33,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class SynapseEntry {
 
     private SynapseAPI synapse;
-    private boolean enable;
     private String serverIp;
     private int port;
     private boolean isLobbyServer;
@@ -56,8 +55,7 @@ public class SynapseEntry {
         this.password = password;
         if (this.password.length() != 16) {
             synapse.getLogger().warning("You must use a 16 keys long password!");
-            synapse.getLogger().warning("This SynapseAPI Entry will not be enabled!");
-            enable = false;
+            synapse.getLogger().warning("This SynapseAPI entry will not be enabled!");
             return;
         }
         this.serverDescription = serverDescription;
@@ -72,10 +70,6 @@ public class SynapseEntry {
 
     public SynapseAPI getSynapse() {
         return this.synapse;
-    }
-
-    public boolean isEnable() {
-        return enable;
     }
 
     public ClientData getClientData() {
@@ -156,7 +150,7 @@ public class SynapseEntry {
     }
 
     public String getHash() {
-        return this.serverIp + ":" + this.port;
+        return this.serverIp + ':' + this.port;
     }
 
     public void connect() {
@@ -175,7 +169,6 @@ public class SynapseEntry {
 
     public class AsyncTicker implements Runnable {
         private long tickUseTime;
-        private long lastWarning;
 
         @Override
         public void run() {
@@ -193,8 +186,6 @@ public class SynapseEntry {
                         Thread.sleep(10 - tickUseTime);
                     } catch (InterruptedException ignore) {
                     }
-                } else if (System.currentTimeMillis() - lastWarning >= 5000) {
-                    lastWarning = System.currentTimeMillis();
                 }
                 startTime = System.currentTimeMillis();
             }
@@ -219,7 +210,7 @@ public class SynapseEntry {
             PlayerLoginPacket playerLoginPacket;
             while ((playerLoginPacket = playerLoginQueue.poll()) != null) {
                 InetSocketAddress address = new InetSocketAddress(playerLoginPacket.address, playerLoginPacket.port);
-                SynapsePlayerCreationEvent ev = new SynapsePlayerCreationEvent(synLibInterface, SynapsePlayer.class, SynapsePlayer.class, new Random().nextLong(), address);
+                SynapsePlayerCreationEvent ev = new SynapsePlayerCreationEvent(synLibInterface, SynapsePlayer.class, SynapsePlayer.class, new SplittableRandom().nextLong(), address);
                 getSynapse().getServer().getPluginManager().callEvent(ev);
                 Class<? extends SynapsePlayer> clazz = ev.getPlayerClass();
                 try {
@@ -302,10 +293,10 @@ public class SynapseEntry {
                 switch (informationPacket.type) {
                     case InformationPacket.TYPE_LOGIN:
                         if (informationPacket.message.equals(InformationPacket.INFO_LOGIN_SUCCESS)) {
-                            this.getSynapse().getLogger().notice("Login success to " + this.serverIp + ":" + this.port);
+                            this.getSynapse().getLogger().notice("Login success to " + this.serverIp + ':' + this.port);
                             this.verified = true;
                         } else if (informationPacket.message.equals(InformationPacket.INFO_LOGIN_FAILED)) {
-                            this.getSynapse().getLogger().notice("Login failed to " + this.serverIp + ":" + this.port);
+                            this.getSynapse().getLogger().notice("Login failed to " + this.serverIp + ':' + this.port);
                         }
                         break;
                     case InformationPacket.TYPE_CLIENT_DATA:
@@ -359,7 +350,7 @@ public class SynapseEntry {
     private List<DataPacket> processBatch(BatchPacket packet) {
         byte[] data;
         try {
-            data = Zlib.inflate(packet.payload, 64 * 1024 * 1024);
+            data = Zlib.inflate(packet.payload, 67108864);
         } catch (Exception e) {
             return new ArrayList<>();
         }

@@ -67,7 +67,7 @@ public class Session {
                 } else {
                     break;
                 }
-            } while (sendLen < 1024 * 64);
+            } while (sendLen < 65536);
         }
     }
 
@@ -81,7 +81,7 @@ public class Session {
     }
 
     public String getHash() {
-        return this.getIp() + ":" + this.getPort();
+        return this.getIp() + ':' + this.getPort();
     }
 
     public String getIp() {

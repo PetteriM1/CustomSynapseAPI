@@ -87,7 +87,6 @@ public class SynapsePlayer extends Player {
 
         if (!this.server.isWhitelisted((this.getName()).toLowerCase())) {
             this.kick(PlayerKickEvent.Reason.NOT_WHITELISTED, "Server is white-listed");
-
             return;
         } else if (this.isBanned()) {
             this.kick(PlayerKickEvent.Reason.NAME_BANNED, "You are banned");
@@ -128,14 +127,13 @@ public class SynapsePlayer extends Player {
             alive = false;
         }
 
-        int exp = nbt.getInt("EXP");
-        int expLevel = nbt.getInt("expLevel");
-        this.setExperience(exp, expLevel);
+        this.setExperience(nbt.getInt("EXP"), nbt.getInt("expLevel"));
 
-        this.gamemode = nbt.getInt("playerGameType") & 0x03;
         if (this.server.getForceGamemode()) {
             this.gamemode = this.server.getGamemode();
             nbt.putInt("playerGameType", this.gamemode);
+        } else {
+            this.gamemode = nbt.getInt("playerGameType") & 0x03;
         }
 
         this.adventureSettings = new AdventureSettings(this)

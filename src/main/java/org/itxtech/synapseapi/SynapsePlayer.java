@@ -11,6 +11,7 @@ import cn.nukkit.event.entity.EntityMotionEvent;
 import cn.nukkit.event.player.PlayerKickEvent;
 import cn.nukkit.event.player.PlayerLoginEvent;
 import cn.nukkit.event.server.DataPacketSendEvent;
+import cn.nukkit.lang.TextContainer;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Position;
 import cn.nukkit.math.NukkitMath;
@@ -473,5 +474,36 @@ public class SynapsePlayer extends Player {
         }
 
         return true;
+    }
+
+    // HACK: Transfer players to lobby on server shutdown
+    // Needed since kicking players moved to happen before disabling plugins
+    // Remove this when something like ServerStopEvent gets implemented
+    @Override
+    public void close(TextContainer message, String reason, boolean notify) {
+        if (!reason.equals(this.getServer().getConfig().getString("settings.shutdown-message", "Server closed"))) {
+            super.close(message, reason, notify);
+        } else {
+            List<String> l = SynapseAPI.getInstance().getConfig().getStringList("lobbies");
+            if (l.size() == 0) {
+                super.close(message, reason, notify);
+                return;
+            }
+            SynapseAPI.getInstance().getLogger().info("Server shutdown detected. Transferring players...");
+            for (Player p : this.getServer().getOnlinePlayers().values()) {
+                if (p instanceof SynapsePlayer) {
+                    p.sendMessage("\u00A7cServer went down");
+                    ((SynapsePlayer) p).transferByDescription(l.get(new SplittableRandom().nextInt(l.size())));
+                } else {
+                    super.close(message, reason, notify);
+                }
+            }
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException ignored) {}
+            for (Player p : this.getServer().getOnlinePlayers().values()) {
+                p.close("", "Already transferred", false);
+            }
+        }
     }
 }

@@ -1,7 +1,6 @@
 package org.itxtech.synapseapi;
 
 import cn.nukkit.Player;
-import cn.nukkit.Server;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.event.EventHandler;
@@ -34,14 +33,17 @@ public class SynapseAPI extends PluginBase implements Listener {
 
     @Override
     public void onEnable() {
+        if (getServer().getName().equals("Nukkit PetteriM1 Edition")) {
+            getServer().getLogger().error("This build of SynapseAPI cannot be used on Nukkit PetteriM1 Edition. Please download correct build.");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+
         instance = this;
 
         this.getServer().getPluginManager().registerEvents(this, this);
         this.messenger = new StandardMessenger();
         this.loadEntries();
-
-        // HACK: Fix food bar
-        this.getServer().getScheduler().scheduleRepeatingTask(new FoodHack(), 1, true);
     }
 
     public Map<String, SynapseEntry> getSynapseEntries() {
@@ -179,21 +181,6 @@ public class SynapseAPI extends PluginBase implements Listener {
                     playerEntry.getKey().dataPacket(pk);
                 }
             }
-        }
-    }
-
-    private static class FoodHack extends cn.nukkit.scheduler.Task {
-
-        @Override
-        public void onRun(int i) {
-            try {
-                for (Player p : Server.getInstance().getOnlinePlayers().values()) {
-                    int g = p.getGamemode();
-                    if (g == 0 || g == 2) {
-                        p.getFoodData().sendFoodLevel();
-                    }
-                }
-            } catch (Exception ignore) {}
         }
     }
 }

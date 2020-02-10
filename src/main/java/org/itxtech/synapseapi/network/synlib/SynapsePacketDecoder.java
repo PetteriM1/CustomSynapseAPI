@@ -3,6 +3,7 @@ package org.itxtech.synapseapi.network.synlib;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ReplayingDecoder;
+import org.itxtech.synapseapi.SynapseAPI;
 import org.itxtech.synapseapi.network.SynapseInterface;
 
 import java.util.List;
@@ -35,11 +36,17 @@ public class SynapsePacketDecoder extends ReplayingDecoder<SynapsePacketDecoder.
                 header.bodyLength(in.readInt());
                 checkpoint(State.BODY);
             case BODY:
-                int bodyLength = checkBodyLength(header.bodyLength());
-                byte[] bytes = new byte[bodyLength];
-                in.readBytes(bytes);
-                out.add(SynapseInterface.getPacket((byte) header.pid(), bytes));
-                break;
+                int bodyLength = header.bodyLength();
+                if (bodyLength < 5242880) {
+                    byte[] bytes = new byte[bodyLength];
+                    in.readBytes(bytes);
+                    out.add(SynapseInterface.getPacket((byte) header.pid(), bytes));
+                    break;
+                } else {
+                    SynapseAPI.getInstance().getLogger().warning("Ignoring packet with body length " + bodyLength);
+                    in.clear();
+                    return;
+                }
             default:
                 break;
         }

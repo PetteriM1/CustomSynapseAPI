@@ -312,7 +312,6 @@ public class SynapsePlayer extends Player {
                     this.setRemoveFormat(false);
                 }
 
-                this.setMovementSpeed(DEFAULT_SPEED);
                 this.sendAttributes();
                 this.setNameTagVisible(true);
                 this.setNameTagAlwaysVisible(true);

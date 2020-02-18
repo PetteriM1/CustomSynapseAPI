@@ -11,6 +11,7 @@ import cn.nukkit.event.entity.EntityMotionEvent;
 import cn.nukkit.event.player.PlayerKickEvent;
 import cn.nukkit.event.player.PlayerLoginEvent;
 import cn.nukkit.event.server.DataPacketSendEvent;
+import cn.nukkit.item.Item;
 import cn.nukkit.lang.TextContainer;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Position;
@@ -383,7 +384,8 @@ public class SynapsePlayer extends Player {
                 return false;
             }
 
-            this.hideEffects();
+            this.clearEffects();
+            this.clearInventory();
             new TransferRunnable(this, hash).run();
             new FastTransferHackRunnable(this).run();
             return true;
@@ -392,7 +394,7 @@ public class SynapsePlayer extends Player {
         return false;
     }
 
-    private void hideEffects() {
+    private void clearEffects() {
         for (Effect e : this.getEffects().values()) {
             MobEffectPacket pk = new MobEffectPacket();
             pk.eid = this.getId();
@@ -400,6 +402,13 @@ public class SynapsePlayer extends Player {
             pk.eventId = MobEffectPacket.EVENT_REMOVE;
             this.dataPacket(pk);
         }
+    }
+
+    private void clearInventory() {
+        InventoryContentPacket pk = new InventoryContentPacket();
+        pk.inventoryId = this.getWindowId(this.inventory);
+        pk.slots = new Item[this.inventory.getSize()];
+        this.dataPacket(pk);
     }
 
     public void setUniqueId(UUID uuid) {

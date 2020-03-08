@@ -2,6 +2,7 @@ package org.itxtech.synapseapi;
 
 import cn.nukkit.Nukkit;
 import cn.nukkit.Server;
+import cn.nukkit.event.player.PlayerKickEvent;
 import cn.nukkit.math.NukkitMath;
 import cn.nukkit.network.SourceInterface;
 import cn.nukkit.network.protocol.BatchPacket;
@@ -10,6 +11,7 @@ import cn.nukkit.network.protocol.ProtocolInfo;
 import cn.nukkit.plugin.Plugin;
 import cn.nukkit.utils.Binary;
 import cn.nukkit.utils.BinaryStream;
+import cn.nukkit.utils.Utils;
 import cn.nukkit.utils.Zlib;
 import com.google.common.hash.Hashing;
 import com.google.gson.Gson;
@@ -210,7 +212,7 @@ public class SynapseEntry {
             PlayerLoginPacket playerLoginPacket;
             while ((playerLoginPacket = playerLoginQueue.poll()) != null) {
                 InetSocketAddress address = new InetSocketAddress(playerLoginPacket.address, playerLoginPacket.port);
-                SynapsePlayerCreationEvent ev = new SynapsePlayerCreationEvent(synLibInterface, SynapsePlayer.class, SynapsePlayer.class, new SplittableRandom().nextLong(), address);
+                SynapsePlayerCreationEvent ev = new SynapsePlayerCreationEvent(synLibInterface, SynapsePlayer.class, SynapsePlayer.class, Utils.random.nextLong(), address);
                 getSynapse().getServer().getPluginManager().callEvent(ev);
                 Class<? extends SynapsePlayer> clazz = ev.getPlayerClass();
                 try {
@@ -314,12 +316,16 @@ public class SynapseEntry {
                     DataPacket pk0 = this.getSynapse().getPacket(redirectPacket.mcpeBuffer);
                     if (pk0 != null) {
                         if (pk0.pid() == ProtocolInfo.BATCH_PACKET) pk0.setOffset(1);
-                        pk0.decode();
+                        try {
+                            pk0.decode();
+                        } catch (ArrayIndexOutOfBoundsException ex) {
+                            SynapsePlayer player = this.players.get(uuid);
+                            player.kick(PlayerKickEvent.Reason.UNKNOWN, "Exception while handling incoming packet: \n" + ex.toString(), false);
+                            break;
+                        }
                         SynapsePlayer player = this.players.get(uuid);
                         if (pk0.pid() == ProtocolInfo.BATCH_PACKET) {
-                            this.processBatch((BatchPacket) pk0).forEach(subPacket -> {
-                                this.redirectPacketQueue.offer(new RedirectPacketEntry(player, subPacket));
-                            });
+                            this.processBatch((BatchPacket) pk0).forEach(subPacket -> this.redirectPacketQueue.offer(new RedirectPacketEntry(player, subPacket)));
                         } else {
                             this.redirectPacketQueue.offer(new RedirectPacketEntry(player, pk0));
                         }

@@ -12,6 +12,7 @@ import cn.nukkit.network.SourceInterface;
 import cn.nukkit.network.protocol.DataPacket;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.ConfigSection;
+import cn.nukkit.utils.Utils;
 import org.itxtech.synapseapi.messaging.Messenger;
 import org.itxtech.synapseapi.messaging.StandardMessenger;
 import org.itxtech.synapseapi.utils.DataPacketEidReplacer;
@@ -117,8 +118,14 @@ public class SynapseAPI extends PluginBase implements Listener {
                     if (p.getSynapseEntry().getServerDescription().equals(args[0])) {
                         p.sendMessage("\u00A7cYou are already on this server");
                     } else {
-                        if (!p.transferByDescription(args[0])) {
-                            p.sendMessage("\u00A7cUnknown server");
+                        int result = p.transferByDescriptionAdvanced(args[0]);
+                        switch (result) {
+                            case 1:
+                                p.sendMessage("\u00A7cUnknown server");
+                                break;
+                            case 3:
+                                p.sendMessage("\u00A7cServer is full");
+                                break;
                         }
                     }
                 } else {
@@ -128,7 +135,7 @@ public class SynapseAPI extends PluginBase implements Listener {
                 List<String> l = getConfig().getStringList("lobbies");
                 if (l.size() == 0) return true;
                 if (!l.contains(p.getSynapseEntry().getServerDescription()) && !p.getSynapseEntry().isLobbyServer()) {
-                    p.transferByDescription(l.get(new SplittableRandom().nextInt(l.size())));
+                    p.transferByDescription(l.get(Utils.random.nextInt(l.size())));
                 } else {
                     p.sendMessage("\u00A7cYou are already on a lobby server");
                 }

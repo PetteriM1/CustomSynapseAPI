@@ -22,6 +22,7 @@ import cn.nukkit.network.protocol.*;
 import cn.nukkit.network.protocol.types.ContainerIds;
 import cn.nukkit.potion.Effect;
 import cn.nukkit.utils.TextFormat;
+import cn.nukkit.utils.Utils;
 import org.itxtech.synapseapi.event.player.SynapsePlayerConnectEvent;
 import org.itxtech.synapseapi.event.player.SynapsePlayerTransferEvent;
 import org.itxtech.synapseapi.network.protocol.spp.PlayerLoginPacket;
@@ -274,6 +275,7 @@ public class SynapsePlayer extends Player {
 
         this.getServer().getScheduler().scheduleTask(null, () -> {
             try {
+                if (!this.isConnected()) return;
                 if (this.protocol >= 313) {
                     if (this.protocol >= 361) {
                         this.dataPacket(new BiomeDefinitionListPacket());
@@ -344,30 +346,48 @@ public class SynapsePlayer extends Player {
         return this.transfer(this.getSynapseEntry().getClientData().getHashByDescription(serverDescription));
     }
 
+    public int transferByDescriptionAdvanced(String serverDescription) {
+        return this.transfer(this.getSynapseEntry().getClientData().getHashByDescription(serverDescription), true, false);
+    }
+
+    public boolean transferByDescriptionAdvanced(String serverDescription, boolean force) {
+        return this.transfer(this.getSynapseEntry().getClientData().getHashByDescription(serverDescription), false, force) == 0;
+    }
+
     public boolean transfer(String hash) {
         return this.transfer(hash, true);
     }
 
     public boolean transfer(String hash, boolean loadScreen) {
+        return this.transfer(hash, true, false) == 0;
+    }
+
+    public int transfer(String hash, boolean loadScreen, boolean force) {
         ClientData clients = this.getSynapseEntry().getClientData();
         Entry clientData = clients.clientList.get(hash);
 
         if (clientData != null) {
+            if (!force) {
+                if (clientData.getPlayerCount() >= clientData.getMaxPlayers()) {
+                    return 3;
+                }
+            }
+
             SynapsePlayerTransferEvent event = new SynapsePlayerTransferEvent(this, clientData);
             this.server.getPluginManager().callEvent(event);
 
             if (event.isCancelled()) {
-                return false;
+                return 2;
             }
 
             this.clearEffects();
             this.clearInventory();
             new TransferRunnable(this, hash).run();
             new FastTransferHackRunnable(this).run();
-            return true;
+            return 0;
         }
 
-        return false;
+        return 1;
     }
 
     private void clearEffects() {
@@ -381,10 +401,12 @@ public class SynapsePlayer extends Player {
     }
 
     private void clearInventory() {
-        InventoryContentPacket pk = new InventoryContentPacket();
-        pk.inventoryId = this.getWindowId(this.inventory);
-        pk.slots = new Item[this.inventory.getSize()];
-        this.dataPacket(pk);
+        if (this.inventory != null) {
+            InventoryContentPacket pk = new InventoryContentPacket();
+            pk.inventoryId = this.getWindowId(this.inventory);
+            pk.slots = new Item[this.inventory.getSize()];
+            this.dataPacket(pk);
+        }
     }
 
     public void setUniqueId(UUID uuid) {
@@ -472,5 +494,24 @@ public class SynapsePlayer extends Player {
         }
 
         return true;
+    }
+
+    // HACK: Transfer players to lobby when the server is full
+    @Override
+    public boolean kick(PlayerKickEvent.Reason reason, String reasonString, boolean isAdmin) {
+        if (PlayerKickEvent.Reason.SERVER_FULL == reason) {
+            List<String> l = SynapseAPI.getInstance().getConfig().getStringList("lobbies");
+            int size = l.size();
+            if (size == 0) {
+                return super.kick(reason, reasonString, isAdmin);
+            }
+            this.sendMessage("\u00A7cServer is full");
+            if (!this.transferByDescriptionAdvanced(l.get(size == 1 ? 0 : Utils.random.nextInt(size)), true)) {
+                return super.kick(reason, reasonString, isAdmin);
+            }
+            return false;
+        }
+
+        return super.kick(reason, reasonString, isAdmin);
     }
 }

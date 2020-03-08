@@ -368,30 +368,44 @@ public class SynapsePlayer extends Player {
         return this.transfer(this.getSynapseEntry().getClientData().getHashByDescription(serverDescription));
     }
 
+    public boolean transferByDescriptionAdvanced(String serverDescription, boolean force) {
+        return this.transfer(this.getSynapseEntry().getClientData().getHashByDescription(serverDescription), false, force) == 0;
+    }
+
     public boolean transfer(String hash) {
         return this.transfer(hash, true);
     }
 
     public boolean transfer(String hash, boolean loadScreen) {
+        return this.transfer(hash, true, false) == 0;
+    }
+
+    public int transfer(String hash, boolean loadScreen, boolean force) {
         ClientData clients = this.getSynapseEntry().getClientData();
         Entry clientData = clients.clientList.get(hash);
 
         if (clientData != null) {
+            if (!force) {
+                if (clientData.getPlayerCount() >= clientData.getMaxPlayers()) {
+                    return 3;
+                }
+            }
+
             SynapsePlayerTransferEvent event = new SynapsePlayerTransferEvent(this, clientData);
             this.server.getPluginManager().callEvent(event);
 
             if (event.isCancelled()) {
-                return false;
+                return 2;
             }
 
             this.clearEffects();
             this.clearInventory();
             new TransferRunnable(this, hash).run();
             new FastTransferHackRunnable(this).run();
-            return true;
+            return 0;
         }
 
-        return false;
+        return 1;
     }
 
     private void clearEffects() {
@@ -405,10 +419,12 @@ public class SynapsePlayer extends Player {
     }
 
     private void clearInventory() {
-        InventoryContentPacket pk = new InventoryContentPacket();
-        pk.inventoryId = this.getWindowId(this.inventory);
-        pk.slots = new Item[this.inventory.getSize()];
-        this.dataPacket(pk);
+        if (this.inventory != null) {
+            InventoryContentPacket pk = new InventoryContentPacket();
+            pk.inventoryId = this.getWindowId(this.inventory);
+            pk.slots = new Item[this.inventory.getSize()];
+            this.dataPacket(pk);
+        }
     }
 
     public void setUniqueId(UUID uuid) {
@@ -493,15 +509,17 @@ public class SynapsePlayer extends Player {
             super.close(message, reason, notify);
         } else {
             List<String> l = SynapseAPI.getInstance().getConfig().getStringList("lobbies");
-            if (l.size() == 0) {
+            int size = l.size();
+            if (size == 0) {
                 super.close(message, reason, notify);
                 return;
             }
             SynapseAPI.getInstance().getLogger().info("Server shutdown detected. Transferring players...");
+            SplittableRandom r = new SplittableRandom();
             for (Player p : this.getServer().getOnlinePlayers().values()) {
                 if (p instanceof SynapsePlayer) {
                     p.sendMessage("\u00A7cServer went down");
-                    ((SynapsePlayer) p).transferByDescription(l.get(new SplittableRandom().nextInt(l.size())));
+                    ((SynapsePlayer) p).transferByDescriptionAdvanced(l.get(size == 1 ? 0 : r.nextInt(size)), true);
                 } else {
                     super.close(message, reason, notify);
                 }
@@ -513,5 +531,24 @@ public class SynapsePlayer extends Player {
                 p.close("", "Already transferred", false);
             }
         }
+    }
+
+    // HACK: Transfer players to lobby when the server is full
+    @Override
+    public boolean kick(PlayerKickEvent.Reason reason, String reasonString, boolean isAdmin) {
+        if (PlayerKickEvent.Reason.SERVER_FULL == reason) {
+            List<String> l = SynapseAPI.getInstance().getConfig().getStringList("lobbies");
+            int size = l.size();
+            if (size == 0) {
+                return super.kick(reason, reasonString, isAdmin);
+            }
+            this.sendMessage("\u00A7cServer is full");
+            if (!this.transferByDescriptionAdvanced(l.get(size == 1 ? 0 : new SplittableRandom().nextInt(size)), true)) {
+                return super.kick(reason, reasonString, isAdmin);
+            }
+            return false;
+        }
+
+        return super.kick(reason, reasonString, isAdmin);
     }
 }

@@ -306,6 +306,7 @@ public class SynapsePlayer extends Player {
 
         this.getServer().getScheduler().scheduleTask(null, () -> {
             try {
+                if (!this.isConnected()) return;
                 this.dataPacket(new BiomeDefinitionListPacket());
                 this.dataPacket(new AvailableEntityIdentifiersPacket());
 
@@ -366,6 +367,10 @@ public class SynapsePlayer extends Player {
 
     public boolean transferByDescription(String serverDescription) {
         return this.transfer(this.getSynapseEntry().getClientData().getHashByDescription(serverDescription));
+    }
+
+    public int transferByDescriptionAdvanced(String serverDescription) {
+        return this.transfer(this.getSynapseEntry().getClientData().getHashByDescription(serverDescription), true, false);
     }
 
     public boolean transferByDescriptionAdvanced(String serverDescription, boolean force) {

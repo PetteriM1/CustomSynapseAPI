@@ -3,6 +3,7 @@ package org.itxtech.synapseapi;
 import cn.nukkit.Nukkit;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
+import cn.nukkit.event.player.PlayerKickEvent;
 import cn.nukkit.math.NukkitMath;
 import cn.nukkit.network.SourceInterface;
 import cn.nukkit.network.protocol.BatchPacket;
@@ -315,12 +316,16 @@ public class SynapseEntry {
                     DataPacket pk0 = this.getSynapse().getPacket(redirectPacket.mcpeBuffer);
                     if (pk0 != null) {
                         if (pk0.pid() == ProtocolInfo.BATCH_PACKET) pk0.setOffset(1);
-                        pk0.decode();
+                        try {
+                            pk0.decode();
+                        } catch (ArrayIndexOutOfBoundsException ex) {
+                            SynapsePlayer player = this.players.get(uuid);
+                            player.kick(PlayerKickEvent.Reason.UNKNOWN, "Exception while handling incoming packet: \n" + ex.toString(), false);
+                            break;
+                        }
                         SynapsePlayer player = this.players.get(uuid);
                         if (pk0.pid() == ProtocolInfo.BATCH_PACKET) {
-                            this.processBatch((BatchPacket) pk0).forEach(subPacket -> {
-                                this.redirectPacketQueue.offer(new RedirectPacketEntry(player, subPacket));
-                            });
+                            this.processBatch((BatchPacket) pk0).forEach(subPacket -> this.redirectPacketQueue.offer(new RedirectPacketEntry(player, subPacket)));
                         } else {
                             this.redirectPacketQueue.offer(new RedirectPacketEntry(player, pk0));
                         }

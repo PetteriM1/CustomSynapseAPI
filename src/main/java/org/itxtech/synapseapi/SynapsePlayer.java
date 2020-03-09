@@ -23,6 +23,7 @@ import cn.nukkit.network.protocol.*;
 import cn.nukkit.network.protocol.types.ContainerIds;
 import cn.nukkit.potion.Effect;
 import cn.nukkit.utils.TextFormat;
+import org.itxtech.synapseapi.event.player.SynapseFullServerPlayerTransferEvent;
 import org.itxtech.synapseapi.event.player.SynapsePlayerConnectEvent;
 import org.itxtech.synapseapi.event.player.SynapsePlayerTransferEvent;
 import org.itxtech.synapseapi.network.protocol.spp.PlayerLoginPacket;
@@ -369,12 +370,8 @@ public class SynapsePlayer extends Player {
         return this.transfer(this.getSynapseEntry().getClientData().getHashByDescription(serverDescription));
     }
 
-    public int transferByDescriptionAdvanced(String serverDescription) {
-        return this.transfer(this.getSynapseEntry().getClientData().getHashByDescription(serverDescription), true, false);
-    }
-
-    public boolean transferByDescriptionAdvanced(String serverDescription, boolean force) {
-        return this.transfer(this.getSynapseEntry().getClientData().getHashByDescription(serverDescription), false, force) == 0;
+    public int transferByDescriptionAdvanced(String serverDescription, boolean loadScreen, boolean force) {
+        return this.transfer(this.getSynapseEntry().getClientData().getHashByDescription(serverDescription), loadScreen, force);
     }
 
     public boolean transfer(String hash) {
@@ -382,7 +379,7 @@ public class SynapsePlayer extends Player {
     }
 
     public boolean transfer(String hash, boolean loadScreen) {
-        return this.transfer(hash, true, false) == 0;
+        return this.transfer(hash, loadScreen, false) == 0;
     }
 
     public int transfer(String hash, boolean loadScreen, boolean force) {
@@ -524,7 +521,7 @@ public class SynapsePlayer extends Player {
             for (Player p : this.getServer().getOnlinePlayers().values()) {
                 if (p instanceof SynapsePlayer) {
                     p.sendMessage("\u00A7cServer went down");
-                    ((SynapsePlayer) p).transferByDescriptionAdvanced(l.get(size == 1 ? 0 : r.nextInt(size)), true);
+                    ((SynapsePlayer) p).transferByDescriptionAdvanced(l.get(size == 1 ? 0 : r.nextInt(size)), true, true);
                 } else {
                     super.close(message, reason, notify);
                 }
@@ -542,13 +539,21 @@ public class SynapsePlayer extends Player {
     @Override
     public boolean kick(PlayerKickEvent.Reason reason, String reasonString, boolean isAdmin) {
         if (PlayerKickEvent.Reason.SERVER_FULL == reason) {
+            SynapseFullServerPlayerTransferEvent event = new SynapseFullServerPlayerTransferEvent(this);
+            this.server.getPluginManager().callEvent(event);
+            if (event.isCancelled()) {
+                if (event.getKick()) {
+                    return super.kick(reason, reasonString, isAdmin);
+                }
+                return false;
+            }
             List<String> l = SynapseAPI.getInstance().getConfig().getStringList("lobbies");
             int size = l.size();
             if (size == 0) {
                 return super.kick(reason, reasonString, isAdmin);
             }
             this.sendMessage("\u00A7cServer is full");
-            if (!this.transferByDescriptionAdvanced(l.get(size == 1 ? 0 : new SplittableRandom().nextInt(size)), true)) {
+            if (this.transferByDescriptionAdvanced(l.get(size == 1 ? 0 : new SplittableRandom().nextInt(size)), false, true) != 0) {
                 return super.kick(reason, reasonString, isAdmin);
             }
             return false;

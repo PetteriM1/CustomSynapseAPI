@@ -8,21 +8,11 @@ public class SynapseFullServerPlayerTransferEvent extends SynapsePlayerEvent imp
 
     private static final HandlerList handlers = new HandlerList();
 
-    private boolean kick;
-
     public SynapseFullServerPlayerTransferEvent(SynapsePlayer player) {
         super(player);
     }
 
     public static HandlerList getHandlers() {
         return handlers;
-    }
-
-    public boolean getKick() {
-        return kick;
-    }
-
-    public void setKick(boolean kick) {
-        this.kick = kick;
     }
 }

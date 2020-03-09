@@ -347,44 +347,30 @@ public class SynapsePlayer extends Player {
         return this.transfer(this.getSynapseEntry().getClientData().getHashByDescription(serverDescription));
     }
 
-    public int transferByDescriptionAdvanced(String serverDescription, boolean loadScreen, boolean force) {
-        return this.transfer(this.getSynapseEntry().getClientData().getHashByDescription(serverDescription), loadScreen, force);
-    }
-
     public boolean transfer(String hash) {
         return this.transfer(hash, true);
     }
 
     public boolean transfer(String hash, boolean loadScreen) {
-        return this.transfer(hash, loadScreen, false) == 0;
-    }
-
-    public int transfer(String hash, boolean loadScreen, boolean force) {
         ClientData clients = this.getSynapseEntry().getClientData();
         Entry clientData = clients.clientList.get(hash);
 
         if (clientData != null) {
-            if (!force) {
-                if (clientData.getPlayerCount() >= clientData.getMaxPlayers()) {
-                    return 3;
-                }
-            }
-
             SynapsePlayerTransferEvent event = new SynapsePlayerTransferEvent(this, clientData);
             this.server.getPluginManager().callEvent(event);
 
             if (event.isCancelled()) {
-                return 2;
+                return false;
             }
 
             this.clearEffects();
             this.clearInventory();
             new TransferRunnable(this, hash).run();
             new FastTransferHackRunnable(this).run();
-            return 0;
+            return true;
         }
 
-        return 1;
+        return false;
     }
 
     private void clearEffects() {
@@ -500,9 +486,6 @@ public class SynapsePlayer extends Player {
             SynapseFullServerPlayerTransferEvent event = new SynapseFullServerPlayerTransferEvent(this);
             this.server.getPluginManager().callEvent(event);
             if (event.isCancelled()) {
-                if (event.getKick()) {
-                    return super.kick(reason, reasonString, isAdmin);
-                }
                 return false;
             }
             List<String> l = SynapseAPI.getInstance().getConfig().getStringList("lobbies");
@@ -511,7 +494,7 @@ public class SynapsePlayer extends Player {
                 return super.kick(reason, reasonString, isAdmin);
             }
             this.sendMessage("\u00A7cServer is full");
-            if (this.transferByDescriptionAdvanced(l.get(size == 1 ? 0 : Utils.random.nextInt(size)), false, true) != 0) {
+            if (!this.transferByDescription(l.get(size == 1 ? 0 : Utils.random.nextInt(size)))) {
                 return super.kick(reason, reasonString, isAdmin);
             }
             return false;

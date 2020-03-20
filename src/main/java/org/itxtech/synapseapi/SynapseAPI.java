@@ -7,6 +7,7 @@ import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.player.PlayerQuitEvent;
 import cn.nukkit.event.server.BatchPacketsEvent;
+import cn.nukkit.event.server.ServerStopEvent;
 import cn.nukkit.network.RakNetInterface;
 import cn.nukkit.network.SourceInterface;
 import cn.nukkit.network.protocol.DataPacket;
@@ -183,5 +184,24 @@ public class SynapseAPI extends PluginBase implements Listener {
                 }
             }
         }
+    }
+
+    @EventHandler
+    public void onServerShutdown(ServerStopEvent e) {
+        List<String> l = SynapseAPI.getInstance().getConfig().getStringList("lobbies");
+        int size = l.size();
+        if (size == 0) {
+            return;
+        }
+        SplittableRandom r = new SplittableRandom();
+        for (Player p : this.getServer().getOnlinePlayers().values()) {
+            if (p instanceof SynapsePlayer) {
+                p.sendMessage("\u00A7cServer went down");
+                ((SynapsePlayer) p).transferByDescription(l.get(size == 1 ? 0 : r.nextInt(size)));
+            }
+        }
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException ignored) {}
     }
 }

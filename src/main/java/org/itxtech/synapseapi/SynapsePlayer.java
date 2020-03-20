@@ -126,7 +126,7 @@ public class SynapsePlayer extends Player {
 
         nbt.putString("NameTag", this.username);
 
-        if (0 >= nbt.getShort("Health")) {
+        if (nbt.getShort("Health") < 1) {
             alive = false;
         }
 
@@ -307,6 +307,14 @@ public class SynapsePlayer extends Player {
 
                 this.inventory.sendHeldItem(this);
                 this.server.sendRecipeList(this);
+
+                SetDifficultyPacket pk = new SetDifficultyPacket();
+                pk.difficulty = this.getServer().getDifficulty();
+                this.dataPacket(pk);
+
+                GameRulesChangedPacket packet = new GameRulesChangedPacket();
+                packet.gameRules = level.getGameRules();
+                this.dataPacket(packet);
             } catch (Exception e) {
                 this.close("", "Internal Server Error");
                 getServer().getLogger().logException(e);

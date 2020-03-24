@@ -44,7 +44,6 @@ public class SynapsePacketDecoder extends ReplayingDecoder<SynapsePacketDecoder.
                     break;
                 } else {
                     SynapseAPI.getInstance().getLogger().warning("Ignoring packet with body length " + bodyLength);
-                    in.clear();
                     return;
                 }
             default:

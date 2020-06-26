@@ -27,7 +27,6 @@ import org.itxtech.synapseapi.event.player.SynapseFullServerPlayerTransferEvent;
 import org.itxtech.synapseapi.event.player.SynapsePlayerConnectEvent;
 import org.itxtech.synapseapi.event.player.SynapsePlayerTransferEvent;
 import org.itxtech.synapseapi.network.protocol.spp.PlayerLoginPacket;
-import org.itxtech.synapseapi.runnable.FastTransferHackRunnable;
 import org.itxtech.synapseapi.runnable.TransferRunnable;
 import org.itxtech.synapseapi.utils.ClientData;
 import org.itxtech.synapseapi.utils.ClientData.Entry;
@@ -178,7 +177,9 @@ public class SynapsePlayer extends Player {
             this.server.saveOfflinePlayerData(this.username, nbt, true);
         }
 
-        this.sendPlayStatus(PlayStatusPacket.LOGIN_SUCCESS);
+        if (this.isFirstTimeLogin) {
+            this.sendPlayStatus(PlayStatusPacket.LOGIN_SUCCESS);
+        }
 
         ListTag<DoubleTag> posList = nbt.getList("Pos", DoubleTag.class);
 
@@ -271,9 +272,6 @@ public class SynapsePlayer extends Player {
                 String.valueOf(NukkitMath.round(this.y, 4)),
                 String.valueOf(NukkitMath.round(this.z, 4))));
 
-        this.getLevel().sendTime(this);
-        this.getLevel().sendWeather(this);
-
         this.getServer().getScheduler().scheduleTask(null, () -> {
             try {
                 if (!this.isConnected()) return;
@@ -297,10 +295,14 @@ public class SynapsePlayer extends Player {
                 this.sendData(this);
                 this.sendAllInventories();
 
-                if (this.gamemode == Player.SPECTATOR) {
-                    InventoryContentPacket inventoryContentPacket = new InventoryContentPacket();
-                    inventoryContentPacket.inventoryId = ContainerIds.CREATIVE;
-                    this.dataPacket(inventoryContentPacket);
+                if (this.protocol < 407) {
+                    if (this.gamemode == Player.SPECTATOR) {
+                        InventoryContentPacket inventoryContentPacket = new InventoryContentPacket();
+                        inventoryContentPacket.inventoryId = ContainerIds.CREATIVE;
+                        this.dataPacket(inventoryContentPacket);
+                    } else {
+                        this.inventory.sendCreativeContents();
+                    }
                 } else {
                     this.inventory.sendCreativeContents();
                 }
@@ -308,13 +310,15 @@ public class SynapsePlayer extends Player {
                 this.inventory.sendHeldItem(this);
                 this.server.sendRecipeList(this);
 
-                SetDifficultyPacket pk = new SetDifficultyPacket();
-                pk.difficulty = this.getServer().getDifficulty();
-                this.dataPacket(pk);
+                if (!this.isFirstTimeLogin) {
+                    SetDifficultyPacket pk = new SetDifficultyPacket();
+                    pk.difficulty = this.getServer().getDifficulty();
+                    this.dataPacket(pk);
 
-                GameRulesChangedPacket packet = new GameRulesChangedPacket();
-                packet.gameRules = level.getGameRules();
-                this.dataPacket(packet);
+                    GameRulesChangedPacket packet = new GameRulesChangedPacket();
+                    packet.gameRules = level.getGameRules();
+                    this.dataPacket(packet);
+                }
             } catch (Exception e) {
                 this.close("", "Internal Server Error");
                 getServer().getLogger().logException(e);
@@ -330,7 +334,10 @@ public class SynapsePlayer extends Player {
         chunkRadiusUpdatePacket.radius = this.chunkRadius;
         this.dataPacket(chunkRadiusUpdatePacket);
 
-        if (!isFirstTimeLogin) {
+        this.getLevel().sendTime(this);
+        this.getLevel().sendWeather(this);
+
+        if (!this.isFirstTimeLogin) {
             this.doFirstSpawn();
         }
     }
@@ -374,7 +381,6 @@ public class SynapsePlayer extends Player {
             this.clearEffects();
             this.clearInventory();
             new TransferRunnable(this, hash).run();
-            new FastTransferHackRunnable(this).run();
             return true;
         }
 
@@ -415,7 +421,9 @@ public class SynapsePlayer extends Player {
             data.put(command.getName(), data0);
         }
         pk.commands = data;
-        this.dataPacket(pk, true);
+        if (this.protocol < 407) { //TODO: fix this
+            this.dataPacket(pk, true);
+        }
     }
 
     @Override

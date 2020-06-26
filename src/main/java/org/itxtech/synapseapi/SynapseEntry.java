@@ -1,6 +1,7 @@
 package org.itxtech.synapseapi;
 
 import cn.nukkit.Nukkit;
+import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.event.player.PlayerKickEvent;
 import cn.nukkit.math.NukkitMath;
@@ -218,6 +219,7 @@ public class SynapseEntry {
                 try {
                     Constructor constructor = clazz.getConstructor(SourceInterface.class, SynapseEntry.class, Long.class, InetSocketAddress.class);
                     SynapsePlayer player = (SynapsePlayer) constructor.newInstance(synLibInterface, this.entry, ev.getClientId(), address);
+                    player.raknetProtocol = playerLoginPacket.raknetProtocol;
                     player.setUniqueId(playerLoginPacket.uuid);
                     players.put(playerLoginPacket.uuid, player);
                     getSynapse().getServer().addPlayer(address, player);
@@ -316,16 +318,17 @@ public class SynapseEntry {
                     DataPacket pk0 = this.getSynapse().getPacket(redirectPacket.mcpeBuffer);
                     if (pk0 != null) {
                         if (pk0.pid() == ProtocolInfo.BATCH_PACKET) pk0.setOffset(1);
+                        SynapsePlayer player = this.players.get(uuid);
+                        pk0.protocol = player.protocol;
                         try {
                             pk0.decode();
                         } catch (ArrayIndexOutOfBoundsException ex) {
-                            SynapsePlayer player = this.players.get(uuid);
                             player.kick(PlayerKickEvent.Reason.UNKNOWN, "Exception while handling incoming packet: \n" + ex.toString(), false);
+                            ex.printStackTrace();
                             break;
                         }
-                        SynapsePlayer player = this.players.get(uuid);
                         if (pk0.pid() == ProtocolInfo.BATCH_PACKET) {
-                            this.processBatch((BatchPacket) pk0).forEach(subPacket -> this.redirectPacketQueue.offer(new RedirectPacketEntry(player, subPacket)));
+                            this.processBatch(player, (BatchPacket) pk0).forEach(subPacket -> this.redirectPacketQueue.offer(new RedirectPacketEntry(player, subPacket)));
                         } else {
                             this.redirectPacketQueue.offer(new RedirectPacketEntry(player, pk0));
                         }
@@ -353,10 +356,14 @@ public class SynapseEntry {
         }
     }
 
-    private List<DataPacket> processBatch(BatchPacket packet) {
+    private List<DataPacket> processBatch(Player player, BatchPacket packet) {
         byte[] data;
         try {
-            data = Zlib.inflate(packet.payload, 67108864);
+            if (player.raknetProtocol >= 10) {
+                data = Zlib.inflateRaw(packet.payload, 2097152);
+            } else {
+                data = Zlib.inflate(packet.payload, 2097152);
+            }
         } catch (Exception e) {
             return new ArrayList<>();
         }

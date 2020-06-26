@@ -43,6 +43,7 @@ public class SynapseAPI extends PluginBase implements Listener {
 
         instance = this;
 
+        getServer().networkCompressionLevel = 0;
         this.getServer().getPluginManager().registerEvents(this, this);
         this.messenger = new StandardMessenger();
         this.loadEntries();

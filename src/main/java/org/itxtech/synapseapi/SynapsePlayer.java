@@ -421,9 +421,7 @@ public class SynapsePlayer extends Player {
             data.put(command.getName(), data0);
         }
         pk.commands = data;
-        if (this.protocol < 407) { //TODO: fix this
-            this.dataPacket(pk, true);
-        }
+        this.dataPacket(pk, true);
     }
 
     @Override

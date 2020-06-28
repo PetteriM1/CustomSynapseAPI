@@ -20,7 +20,6 @@ import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.*;
 import cn.nukkit.network.SourceInterface;
 import cn.nukkit.network.protocol.*;
-import cn.nukkit.network.protocol.types.ContainerIds;
 import cn.nukkit.potion.Effect;
 import cn.nukkit.utils.TextFormat;
 import org.itxtech.synapseapi.event.player.SynapseFullServerPlayerTransferEvent;
@@ -208,7 +207,9 @@ public class SynapsePlayer extends Player {
             this.server.saveOfflinePlayerData(this.uuid, nbt, true);
         }
 
-        this.sendPlayStatus(PlayStatusPacket.LOGIN_SUCCESS);
+        if (this.isFirstTimeLogin) {
+            this.sendPlayStatus(PlayStatusPacket.LOGIN_SUCCESS);
+        }
 
         ListTag<DoubleTag> posList = nbt.getList("Pos", DoubleTag.class);
 
@@ -301,9 +302,6 @@ public class SynapsePlayer extends Player {
                 String.valueOf(NukkitMath.round(this.y, 4)),
                 String.valueOf(NukkitMath.round(this.z, 4))));
 
-        this.getLevel().sendTime(this);
-        this.getLevel().sendWeather(this);
-
         this.getServer().getScheduler().scheduleTask(null, () -> {
             try {
                 if (!this.isConnected()) return;
@@ -323,24 +321,20 @@ public class SynapsePlayer extends Player {
                 this.sendData(this);
                 this.sendAllInventories();
 
-                if (this.gamemode == Player.SPECTATOR) {
-                    InventoryContentPacket inventoryContentPacket = new InventoryContentPacket();
-                    inventoryContentPacket.inventoryId = ContainerIds.CREATIVE;
-                    this.dataPacket(inventoryContentPacket);
-                } else {
-                    this.inventory.sendCreativeContents();
-                }
+                this.inventory.sendCreativeContents();
 
                 this.inventory.sendHeldItem(this);
                 this.server.sendRecipeList(this);
 
-                SetDifficultyPacket pk = new SetDifficultyPacket();
-                pk.difficulty = this.getServer().getDifficulty();
-                this.dataPacket(pk);
+                if (!this.isFirstTimeLogin) {
+                    SetDifficultyPacket pk = new SetDifficultyPacket();
+                    pk.difficulty = this.getServer().getDifficulty();
+                    this.dataPacket(pk);
 
-                GameRulesChangedPacket packet = new GameRulesChangedPacket();
-                packet.gameRules = level.getGameRules();
-                this.dataPacket(packet);
+                    GameRulesChangedPacket packet = new GameRulesChangedPacket();
+                    packet.gameRules = level.getGameRules();
+                    this.dataPacket(packet);
+                }
             } catch (Exception e) {
                 this.close("", "Internal Server Error");
                 getServer().getLogger().logException(e);
@@ -355,6 +349,9 @@ public class SynapsePlayer extends Player {
         ChunkRadiusUpdatedPacket chunkRadiusUpdatePacket = new ChunkRadiusUpdatedPacket();
         chunkRadiusUpdatePacket.radius = this.chunkRadius;
         this.dataPacket(chunkRadiusUpdatePacket);
+
+        this.getLevel().sendTime(this);
+        this.getLevel().sendWeather(this);
     }
 
     protected void forceSendEmptyChunks() {

@@ -5,6 +5,7 @@ import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.event.player.PlayerKickEvent;
 import cn.nukkit.math.NukkitMath;
+import cn.nukkit.network.Network;
 import cn.nukkit.network.SourceInterface;
 import cn.nukkit.network.protocol.BatchPacket;
 import cn.nukkit.network.protocol.DataPacket;
@@ -12,7 +13,6 @@ import cn.nukkit.network.protocol.ProtocolInfo;
 import cn.nukkit.plugin.Plugin;
 import cn.nukkit.utils.Binary;
 import cn.nukkit.utils.BinaryStream;
-import cn.nukkit.utils.Zlib;
 import com.google.common.hash.Hashing;
 import com.google.gson.Gson;
 import org.itxtech.synapseapi.event.player.SynapsePlayerCreationEvent;
@@ -356,7 +356,7 @@ public class SynapseEntry {
     private List<DataPacket> processBatch(BatchPacket packet) {
         byte[] data;
         try {
-            data = Zlib.inflate(packet.payload, 67108864);
+            data = Network.inflate_raw(packet.payload);
         } catch (Exception e) {
             return new ArrayList<>();
         }

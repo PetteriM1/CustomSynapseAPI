@@ -211,18 +211,22 @@ public class SynapseEntry {
         public void run() {
             PlayerLoginPacket playerLoginPacket;
             while ((playerLoginPacket = playerLoginQueue.poll()) != null) {
-                SynapsePlayerCreationEvent ev = new SynapsePlayerCreationEvent(synLibInterface, SynapsePlayer.class, SynapsePlayer.class, new SplittableRandom().nextLong(), playerLoginPacket.address, playerLoginPacket.port);
-                getSynapse().getServer().getPluginManager().callEvent(ev);
-                Class<? extends SynapsePlayer> clazz = ev.getPlayerClass();
-                try {
-                    Constructor constructor = clazz.getConstructor(SourceInterface.class, SynapseEntry.class, Long.class, String.class, int.class);
-                    SynapsePlayer player = (SynapsePlayer) constructor.newInstance(synLibInterface, this.entry, ev.getClientId(), ev.getAddress(), ev.getPort());
-                    player.setUniqueId(playerLoginPacket.uuid);
-                    players.put(playerLoginPacket.uuid, player);
-                    getSynapse().getServer().addPlayer(playerLoginPacket.uuid.toString(), player);
-                    player.handleLoginPacket(playerLoginPacket);
-                } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
-                    Server.getInstance().getLogger().logException(e);
+                if (playerLoginPacket.raknetProtocol >= 10) {
+                    SynapsePlayerCreationEvent ev = new SynapsePlayerCreationEvent(synLibInterface, SynapsePlayer.class, SynapsePlayer.class, new SplittableRandom().nextLong(), playerLoginPacket.address, playerLoginPacket.port);
+                    getSynapse().getServer().getPluginManager().callEvent(ev);
+                    Class<? extends SynapsePlayer> clazz = ev.getPlayerClass();
+                    try {
+                        Constructor constructor = clazz.getConstructor(SourceInterface.class, SynapseEntry.class, Long.class, String.class, int.class);
+                        SynapsePlayer player = (SynapsePlayer) constructor.newInstance(synLibInterface, this.entry, ev.getClientId(), ev.getAddress(), ev.getPort());
+                        player.setUniqueId(playerLoginPacket.uuid);
+                        players.put(playerLoginPacket.uuid, player);
+                        getSynapse().getServer().addPlayer(playerLoginPacket.uuid.toString(), player);
+                        player.handleLoginPacket(playerLoginPacket);
+                    } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
+                        Server.getInstance().getLogger().logException(e);
+                    }
+                } else {
+                    SynapseAPI.getInstance().getLogger().info("Player login rejected due to unsupported RakNet version");
                 }
             }
 

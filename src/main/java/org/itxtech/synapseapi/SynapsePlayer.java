@@ -14,7 +14,6 @@ import cn.nukkit.event.server.DataPacketSendEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Position;
-import cn.nukkit.math.NukkitMath;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.*;
 import cn.nukkit.network.SourceInterface;
@@ -265,12 +264,7 @@ public class SynapsePlayer extends Player {
         this.server.getLogger().info(this.getServer().getLanguage().translateString("nukkit.player.logIn",
                 TextFormat.AQUA + this.username + TextFormat.WHITE,
                 this.getAddress(),
-                String.valueOf(this.getPort()),
-                String.valueOf(this.id),
-                this.level.getName(),
-                String.valueOf(NukkitMath.round(this.x, 4)),
-                String.valueOf(NukkitMath.round(this.y, 4)),
-                String.valueOf(NukkitMath.round(this.z, 4))));
+                String.valueOf(this.getPort())));
 
         this.getServer().getScheduler().scheduleTask(null, () -> {
             try {
@@ -282,15 +276,11 @@ public class SynapsePlayer extends Player {
                     this.dataPacket(new AvailableEntityIdentifiersPacket());
                 }
 
-                if (this.isOp() || this.hasPermission("nukkit.textcolor") || this.server.suomiCraftPEMode()) {
-                    this.setRemoveFormat(false);
-                }
-
-                this.sendAttributes();
+                this.setCanClimb(true);
                 this.setNameTagVisible(true);
                 this.setNameTagAlwaysVisible(true);
-                this.setCanClimb(true);
-                this.getAdventureSettings().update();
+                this.sendAttributes();
+                this.adventureSettings.update();
                 this.sendPotionEffects(this);
                 this.sendData(this);
                 this.sendAllInventories();
@@ -309,6 +299,10 @@ public class SynapsePlayer extends Player {
 
                 this.inventory.sendHeldItem(this);
                 this.server.sendRecipeList(this);
+
+                if (this.isOp() || this.hasPermission("nukkit.textcolor") || this.server.suomiCraftPEMode()) {
+                    this.setRemoveFormat(false);
+                }
 
                 if (!this.isFirstTimeLogin) {
                     SetDifficultyPacket pk = new SetDifficultyPacket();
@@ -330,15 +324,11 @@ public class SynapsePlayer extends Player {
         this.server.addOnlinePlayer(this);
         this.server.onPlayerCompleteLoginSequence(this);
 
-        ChunkRadiusUpdatedPacket chunkRadiusUpdatePacket = new ChunkRadiusUpdatedPacket();
-        chunkRadiusUpdatePacket.radius = this.chunkRadius;
-        this.dataPacket(chunkRadiusUpdatePacket);
-
-        this.getLevel().sendTime(this);
-        this.getLevel().sendWeather(this);
-
         if (!this.isFirstTimeLogin) {
             this.doFirstSpawn();
+        } else {
+            this.getLevel().sendTime(this);
+            this.getLevel().sendWeather(this);
         }
     }
 

@@ -324,6 +324,10 @@ public class SynapsePlayer extends Player {
         this.server.addOnlinePlayer(this);
         this.server.onPlayerCompleteLoginSequence(this);
 
+        ChunkRadiusUpdatedPacket chunkRadiusUpdatePacket = new ChunkRadiusUpdatedPacket();
+        chunkRadiusUpdatePacket.radius = this.chunkRadius;
+        this.dataPacket(chunkRadiusUpdatePacket);
+        
         if (!this.isFirstTimeLogin) {
             this.doFirstSpawn();
         } else {

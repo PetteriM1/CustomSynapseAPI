@@ -120,7 +120,7 @@ public class SynapseAPI extends PluginBase implements Listener {
                     if (p.getSynapseEntry().getServerDescription().equals(args[0])) {
                         p.sendMessage("\u00A7cYou are already on this server");
                     } else {
-                        if (!p.transferByDescription(args[0])) {
+                        if (p.transferCommand(args[0]) == 0) {
                             p.sendMessage("\u00A7cUnknown server");
                         }
                     }

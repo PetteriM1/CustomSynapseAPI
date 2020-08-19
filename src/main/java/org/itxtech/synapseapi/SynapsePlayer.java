@@ -421,6 +421,28 @@ public class SynapsePlayer extends Player {
         return false;
     }
 
+    int transferCommand(String serverDescription) {
+        String hash = this.getSynapseEntry().getClientData().getHashByDescription(serverDescription);
+        ClientData clients = this.getSynapseEntry().getClientData();
+        Entry clientData = clients.clientList.get(hash);
+
+        if (clientData != null) {
+            SynapsePlayerTransferEvent event = new SynapsePlayerTransferEvent(this, clientData);
+            this.server.getPluginManager().callEvent(event);
+
+            if (event.isCancelled()) {
+                return 2;
+            }
+
+            this.clearEffects();
+            this.clearInventory();
+            new TransferRunnable(this, hash).run();
+            return 1;
+        }
+
+        return 0;
+    }
+
     private void clearEffects() {
         for (Effect e : this.getEffects().values()) {
             MobEffectPacket pk = new MobEffectPacket();

@@ -503,6 +503,7 @@ public class SynapsePlayer extends Player {
     public boolean sendDataPacket(DataPacket packet, boolean needACK, boolean direct) {
         packet.protocol = this.protocol;
         packet = DataPacketEidReplacer.replace(packet, this.getId(), REPLACE_ID);
+
         DataPacketSendEvent ev = new DataPacketSendEvent(this, packet);
         this.server.getPluginManager().callEvent(ev);
         if (ev.isCancelled()) {
@@ -528,7 +529,7 @@ public class SynapsePlayer extends Player {
             }
         }
 
-        if (this.chunk != null) {
+        if (this.chunk != null && this.spawned) {
             this.addMotion(this.motionX, this.motionY, this.motionZ);
             SetEntityMotionPacket pk = new SetEntityMotionPacket();
             pk.eid = this.id;

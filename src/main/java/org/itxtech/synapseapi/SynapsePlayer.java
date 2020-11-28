@@ -300,6 +300,9 @@ public class SynapsePlayer extends Player {
                 if (!this.connected) return;
                 if (this.isFirstTimeLogin && this.protocol >= 313) {
                     if (this.protocol >= 361) {
+                        if (this.protocol >= 419) {
+                            this.dataPacket(new ItemComponentPacket());
+                        }
                         this.dataPacket(new BiomeDefinitionListPacket());
                     }
                     this.dataPacket(new AvailableEntityIdentifiersPacket());
@@ -314,7 +317,7 @@ public class SynapsePlayer extends Player {
                 enableCommandsPK.enabled = this.isEnableClientCommand();
                 this.dataPacket(enableCommandsPK);
 
-                if (!op && this.isEnableClientCommand()) {
+                if (this.isEnableClientCommand()) {
                     this.getServer().getScheduler().scheduleDelayedTask(null, () -> {
                         if (this.isOnline()) {
                             this.sendCommandData();
@@ -339,11 +342,10 @@ public class SynapsePlayer extends Player {
                     this.inventory.sendCreativeContents();
                 }
                 this.sendAllInventories();
-                this.inventory.sendHeldItem(this);
+                this.inventory.sendHeldItemIfNotAir(this);
+                this.server.sendRecipeList(this);
 
-                if (this.isFirstTimeLogin) {
-                    this.server.sendRecipeList(this);
-                } else {
+                if (!this.isFirstTimeLogin) {
                     SetPlayerGameTypePacket pk = new SetPlayerGameTypePacket();
                     pk.gamemode = getClientFriendlyGamemode(gamemode);
                     this.dataPacket(pk);
@@ -500,6 +502,12 @@ public class SynapsePlayer extends Player {
     public int directDataPacket(DataPacket packet, boolean needACK) {
         if (!this.isSynapseLogin) return super.dataPacket(packet, needACK);
         return this.dataPacket(packet) ? 0 : -1;
+    }
+
+    @Override
+    public boolean batchDataPacket(DataPacket packet) {
+        if (!this.isSynapseLogin) return super.batchDataPacket(packet);
+        return sendDataPacket(packet, false, false);
     }
 
     public boolean sendDataPacket(DataPacket packet, boolean needACK, boolean direct) {

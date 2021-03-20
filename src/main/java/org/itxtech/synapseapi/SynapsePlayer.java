@@ -13,7 +13,6 @@ import cn.nukkit.event.player.PlayerLoginEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.lang.TextContainer;
 import cn.nukkit.level.Level;
-import cn.nukkit.level.Position;
 import cn.nukkit.math.NukkitMath;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.*;
@@ -229,11 +228,6 @@ public class SynapsePlayer extends Player {
         if (this.isSpectator()) this.keepMovement = true;
 
         this.forceMovement = this.teleportPosition = this.getPosition();
-
-        Level spawnLevel = this.server.getLevelByName(this.namedTag.getString("SpawnLevel"));
-        if (spawnLevel != null) {
-            this.spawnPosition = new Position(this.namedTag.getInt("SpawnX"), this.namedTag.getInt("SpawnY"), this.namedTag.getInt("SpawnZ"), spawnLevel);
-        }
 
         if (this.isFirstTimeLogin) {
             ResourcePacksInfoPacket infoPacket = new ResourcePacksInfoPacket();

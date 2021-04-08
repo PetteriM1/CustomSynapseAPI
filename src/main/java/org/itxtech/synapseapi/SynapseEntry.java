@@ -342,17 +342,17 @@ public class SynapseEntry {
                     DataPacket pk0 = this.getSynapse().getPacket(redirectPacket.mcpeBuffer);
                     if (pk0 != null) {
                         if (pk0.pid() == ProtocolInfo.BATCH_PACKET) pk0.setOffset(1);
+                        SynapsePlayer player = this.players.get(uuid);
+                        pk0.protocol = player.protocol;
                         try {
                             pk0.decode();
                         } catch (ArrayIndexOutOfBoundsException ex) {
-                            SynapsePlayer player = this.players.get(uuid);
                             player.kick(PlayerKickEvent.Reason.UNKNOWN, "Exception while handling incoming packet: \n" + ex.toString(), false);
                             ex.printStackTrace();
                             break;
                         }
-                        SynapsePlayer player = this.players.get(uuid);
                         if (pk0.pid() == ProtocolInfo.BATCH_PACKET) {
-                            this.processBatch((BatchPacket) pk0).forEach(subPacket -> this.redirectPacketQueue.offer(new RedirectPacketEntry(player, subPacket)));
+                            this.processBatch(player, (BatchPacket) pk0).forEach(subPacket -> this.redirectPacketQueue.offer(new RedirectPacketEntry(player, subPacket)));
                         } else {
                             this.redirectPacketQueue.offer(new RedirectPacketEntry(player, pk0));
                         }
@@ -385,7 +385,7 @@ public class SynapseEntry {
         }
     }
 
-    private List<DataPacket> processBatch(BatchPacket packet) {
+    private List<DataPacket> processBatch(Player player, BatchPacket packet) {
         byte[] data;
         try {
             data = Network.inflateRaw(packet.payload);
@@ -405,6 +405,7 @@ public class SynapseEntry {
                 if ((pk = Server.getInstance().getNetwork().getPacket(buf[0])) != null) {
                     pk.setBuffer(buf, 3);
 
+                    pk.protocol = player.protocol;
                     pk.decode();
 
                     packets.add(pk);

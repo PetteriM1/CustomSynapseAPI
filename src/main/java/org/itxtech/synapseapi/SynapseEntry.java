@@ -406,6 +406,7 @@ public class SynapseEntry {
                 if ((pk = Server.getInstance().getNetwork().getPacket(buf[0])) != null) {
                     pk.setBuffer(buf, 3);
 
+                    pk.protocol = player.protocol;
                     pk.decode();
 
                     packets.add(pk);

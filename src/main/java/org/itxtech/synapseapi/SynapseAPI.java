@@ -14,9 +14,12 @@ import cn.nukkit.network.protocol.DataPacket;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.ConfigSection;
 import cn.nukkit.utils.Utils;
+import cn.nukkit.utils.VarInt;
 import org.itxtech.synapseapi.messaging.Messenger;
 import org.itxtech.synapseapi.messaging.StandardMessenger;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,14 +40,17 @@ public class SynapseAPI extends PluginBase implements Listener {
     }
 
     @Override
+    public void onLoad() {
+        instance = this;
+    }
+
+    @Override
     public void onEnable() {
         if (!getServer().getName().equals("Nukkit PetteriM1 Edition")) {
             getServer().getLogger().error("This build of SynapseAPI can only be used on Nukkit PetteriM1 Edition. Please download correct build.");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
-
-        instance = this;
 
         getServer().networkCompressionLevel = 0;
         this.getServer().getPluginManager().registerEvents(this, this);
@@ -76,14 +82,25 @@ public class SynapseAPI extends PluginBase implements Listener {
     }
 
     public DataPacket getPacket(byte[] buffer) {
-        DataPacket data = this.getServer().getNetwork().getPacket(buffer[0] == (byte) 0xfe ? (byte) 0xff : buffer[0]);
-
-        if (data == null) {
-            return null;
+        ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
+        int header;
+        try {
+            header = (int) VarInt.readUnsignedVarInt(bais);
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to decode packet header", e);
         }
 
-        data.setBuffer(buffer, 1);
-        return data;
+        // | Client ID | Sender ID | Packet ID |
+        // |   2 bits  |   2 bits  |  10 bits  |
+        int packetId = header & 0x3ff;
+
+        DataPacket packet = this.getServer().getNetwork().getPacket((byte) (packetId == 0xfe ? 0xff : packetId));
+
+        if (packet != null) {
+            packet.setBuffer(buffer, buffer.length - bais.available());
+        }
+
+        return packet;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

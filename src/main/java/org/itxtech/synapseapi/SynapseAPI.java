@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class SynapseAPI extends PluginBase implements Listener {
 
+    public static boolean canReconnect = true;
     private static SynapseAPI instance;
     private final Map<String, SynapseEntry> synapseEntries = new HashMap<>();
     private Messenger messenger;
@@ -170,6 +171,7 @@ public class SynapseAPI extends PluginBase implements Listener {
 
     @EventHandler
     public void onServerShutdown(ServerStopEvent e) {
+        canReconnect = false;
         List<String> l = SynapseAPI.getInstance().getConfig().getStringList("lobbies");
         int size = l.size();
         if (size == 0) {

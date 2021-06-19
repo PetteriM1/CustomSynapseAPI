@@ -1,6 +1,7 @@
 package org.itxtech.synapseapi.network.synlib;
 
 import io.netty.channel.Channel;
+import org.itxtech.synapseapi.SynapseAPI;
 import org.itxtech.synapseapi.network.protocol.spp.SynapseDataPacket;
 
 import java.net.InetSocketAddress;
@@ -101,7 +102,7 @@ public class Session {
             this.connected = false;
             this.client.needReconnect = false;
         }
-        if (!this.connected && !this.client.isShutdown()) {
+        if (!this.connected && !this.client.isShutdown() && SynapseAPI.canReconnect) {
             long time;
             if ((time = System.currentTimeMillis()) - this.lastCheck >= 3000) {
                 this.client.getLogger().notice("Trying to re-connect to Synapse Server");

@@ -20,10 +20,10 @@ public class SynapseClient extends Thread {
     public boolean needReconnect = false;
     protected ConcurrentLinkedQueue<SynapseDataPacket> externalQueue;
     protected ConcurrentLinkedQueue<SynapseDataPacket> internalQueue;
-    private ThreadedLogger logger;
-    private String interfaz;
-    private int port;
-    private boolean shutdown = false;
+    private final MainLogger logger;
+    private final String interfaz;
+    private final int port;
+    private boolean shutdown;
     private boolean needAuth = true;
     private boolean connected = false;
     private EventLoopGroup clientGroup;

@@ -24,7 +24,7 @@ import io.netty.channel.socket.SocketChannel;
  */
 public class SynapseClientInitializer extends ChannelInitializer<SocketChannel> {
 
-    private SynapseClient synapseClient;
+    private final SynapseClient synapseClient;
 
     public SynapseClientInitializer(SynapseClient synapseClient) {
         this.synapseClient = synapseClient;

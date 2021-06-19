@@ -94,8 +94,7 @@ public class SynapseEntry {
             this.sendDataPacket(pk);
             try {
                 Thread.sleep(100);
-            } catch (InterruptedException ignored) {
-            }
+            } catch (InterruptedException ignored) {}
         }
         if (this.synapseInterface != null) this.synapseInterface.shutdown();
     }
@@ -246,8 +245,7 @@ public class SynapseEntry {
             while ((playerLogoutPacket = playerLogoutQueue.poll()) != null) {
                 UUID uuid1;
                 if (players.containsKey(uuid1 = playerLogoutPacket.uuid)) {
-                    Player player = players.get(uuid1);
-                    player.close(player.getLeaveMessage(), playerLogoutPacket.reason, true);
+                    players.get(uuid1).close(playerLogoutPacket.reason, playerLogoutPacket.reason, true);
                     removePlayer(uuid1);
                 }
             }

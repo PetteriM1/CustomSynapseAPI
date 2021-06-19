@@ -9,10 +9,6 @@ package org.itxtech.synapseapi.network.synlib;
  */
 public class SynapseContextException extends Exception {
 
-    public SynapseContextException() {
-        super();
-    }
-
     public SynapseContextException(String message) {
         super(message);
     }

@@ -11,7 +11,6 @@ import cn.nukkit.event.entity.EntityMotionEvent;
 import cn.nukkit.event.player.PlayerKickEvent;
 import cn.nukkit.event.player.PlayerLoginEvent;
 import cn.nukkit.item.Item;
-import cn.nukkit.lang.TextContainer;
 import cn.nukkit.level.Level;
 import cn.nukkit.math.NukkitMath;
 import cn.nukkit.math.Vector3;
@@ -43,11 +42,11 @@ public class SynapsePlayer extends Player {
 
     public static final long REPLACE_ID = Long.MAX_VALUE;
 
-    private static final Method updateName;
-
     public boolean isSynapseLogin;
     protected SynapseEntry synapseEntry;
     private boolean isFirstTimeLogin;
+
+    private static final Method updateName;
 
     static {
         try {
@@ -129,9 +128,8 @@ public class SynapsePlayer extends Player {
             File dataFile = new File(server.getDataPath() + "players/" + this.uuid + ".dat");
             if (legacyDataFile.exists() && !dataFile.exists()) {
                 nbt = this.server.getOfflinePlayerData(this.username, false);
-
                 if (!legacyDataFile.delete()) {
-                    this.server.getLogger().alert("Could not delete legacy player data for " + this.username);
+                    this.server.getLogger().warning("Could not delete legacy player data for " + this.username);
                 }
             } else {
                 nbt = this.server.getOfflinePlayerData(this.uuid, true);
@@ -146,7 +144,8 @@ public class SynapsePlayer extends Player {
         if (getLoginChainData().isXboxAuthed() && server.getPropertyBoolean("xbox-auth") || !server.getPropertyBoolean("xbox-auth")) {
             try {
                 updateName.invoke(server, this.uuid, this.username);
-            } catch (IllegalAccessException | InvocationTargetException ignored) {}
+            } catch (IllegalAccessException | InvocationTargetException ignored) {
+            }
         }
 
         this.playedBefore = (nbt.getLong("lastPlayed") - nbt.getLong("firstPlayed")) > 1;
@@ -255,7 +254,6 @@ public class SynapsePlayer extends Player {
 
         PlayerLoginEvent ev;
         this.server.getPluginManager().callEvent(ev = new PlayerLoginEvent(this, "Plugin reason"));
-
         if (ev.isCancelled()) {
             this.close(this.getLeaveMessage(), ev.getKickMessage());
             return;
@@ -322,7 +320,6 @@ public class SynapsePlayer extends Player {
                         }
                     }, 2);
                 }
-
                 this.adventureSettings.update();
 
                 GameRulesChangedPacket gameRulesPK = new GameRulesChangedPacket();
@@ -336,7 +333,6 @@ public class SynapsePlayer extends Player {
                 if (this.isFirstTimeLogin) {
                     this.inventory.sendCreativeContents();
                 }
-
                 this.sendAllInventories();
                 this.inventory.sendHeldItem(this);
 
@@ -421,6 +417,28 @@ public class SynapsePlayer extends Player {
         }
 
         return false;
+    }
+
+    int transferCommand(String serverDescription) {
+        String hash = this.getSynapseEntry().getClientData().getHashByDescription(serverDescription);
+        ClientData clients = this.getSynapseEntry().getClientData();
+        Entry clientData = clients.clientList.get(hash);
+
+        if (clientData != null) {
+            SynapsePlayerTransferEvent event = new SynapsePlayerTransferEvent(this, clientData);
+            this.server.getPluginManager().callEvent(event);
+
+            if (event.isCancelled()) {
+                return 2;
+            }
+
+            this.clearEffects();
+            this.clearInventory();
+            new TransferRunnable(this, hash).run();
+            return 1;
+        }
+
+        return 0;
     }
 
     private void clearEffects() {
@@ -534,39 +552,6 @@ public class SynapsePlayer extends Player {
         }
 
         return true;
-    }
-
-    // HACK: Transfer players to lobby on server shutdown
-    // Needed since kicking players moved to happen before disabling plugins
-    // Remove this when something like ServerStopEvent gets implemented
-    @Override
-    public void close(TextContainer message, String reason, boolean notify) {
-        if (!reason.equals(this.getServer().getConfig().getString("settings.shutdown-message", "Server closed"))) {
-            super.close(message, reason, notify);
-        } else {
-            List<String> l = SynapseAPI.getInstance().getConfig().getStringList("lobbies");
-            int size = l.size();
-            if (size == 0) {
-                super.close(message, reason, notify);
-                return;
-            }
-            SynapseAPI.getInstance().getLogger().info("Server shutdown detected. Transferring players...");
-            SplittableRandom r = new SplittableRandom();
-            for (Player p : this.getServer().getOnlinePlayers().values()) {
-                if (p instanceof SynapsePlayer) {
-                    p.sendMessage("\u00A7cServer went down");
-                    ((SynapsePlayer) p).transferByDescription(l.get(size == 1 ? 0 : r.nextInt(size)));
-                } else {
-                    super.close(message, reason, notify);
-                }
-            }
-            try {
-                Thread.sleep(200);
-            } catch (InterruptedException ignored) {}
-            for (Player p : this.getServer().getOnlinePlayers().values()) {
-                p.close("", "Already transferred", false);
-            }
-        }
     }
 
     // HACK: Transfer players to lobby when the server is full

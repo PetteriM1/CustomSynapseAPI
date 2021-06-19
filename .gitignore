@@ -58,3 +58,4 @@ nbdist/
 .nb-gradle/
 rebel.xml
 .DS_Store
+lib/server.jar

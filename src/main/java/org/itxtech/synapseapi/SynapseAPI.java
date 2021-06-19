@@ -7,11 +7,13 @@ import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.player.PlayerQuitEvent;
 import cn.nukkit.event.server.BatchPacketsEvent;
+import cn.nukkit.event.server.ServerStopEvent;
 import cn.nukkit.network.RakNetInterface;
 import cn.nukkit.network.SourceInterface;
 import cn.nukkit.network.protocol.DataPacket;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.ConfigSection;
+import cn.nukkit.utils.Utils;
 import org.itxtech.synapseapi.messaging.Messenger;
 import org.itxtech.synapseapi.messaging.StandardMessenger;
 
@@ -44,6 +46,7 @@ public class SynapseAPI extends PluginBase implements Listener {
 
         instance = this;
 
+        getServer().networkCompressionLevel = 0;
         this.getServer().getPluginManager().registerEvents(this, this);
         this.messenger = new StandardMessenger();
         this.loadEntries();
@@ -120,7 +123,7 @@ public class SynapseAPI extends PluginBase implements Listener {
                     if (p.getSynapseEntry().getServerDescription().equals(args[0])) {
                         p.sendMessage("\u00A7cYou are already on this server");
                     } else {
-                        if (!p.transferByDescription(args[0])) {
+                        if (p.transferCommand(args[0]) == 0) {
                             p.sendMessage("\u00A7cUnknown server");
                         }
                     }
@@ -131,7 +134,7 @@ public class SynapseAPI extends PluginBase implements Listener {
                 List<String> l = getConfig().getStringList("lobbies");
                 if (l.size() == 0) return true;
                 if (!l.contains(p.getSynapseEntry().getServerDescription()) && !p.getSynapseEntry().isLobbyServer()) {
-                    p.transferByDescription(l.get(new SplittableRandom().nextInt(l.size())));
+                    p.transferByDescription(l.get(Utils.random.nextInt(l.size())));
                 } else {
                     p.sendMessage("\u00A7cYou are already on a lobby server");
                 }
@@ -163,39 +166,24 @@ public class SynapseAPI extends PluginBase implements Listener {
                 }
             }
         });
+    }
 
-        /*HashMap<SynapseEntry, Map<Player, DataPacket[]>> map = new HashMap<>();
-
-        CompletableFuture.runAsync(() -> {
-            for (Player p : players) {
-                if (!(p instanceof SynapsePlayer)) {
-                    continue;
-                }
-
-                SynapsePlayer player = (SynapsePlayer) p;
-
-                SynapseEntry entry = player.getSynapseEntry();
-                Map<Player, DataPacket[]> playerPackets = map.get(entry);
-                if (playerPackets == null) {
-                    playerPackets = new HashMap<>();
-                }
-
-                DataPacket[] replaced = Arrays.stream(packets)
-                        .map(packet -> DataPacketEidReplacer.replace(packet, p.getId(), SynapsePlayer.REPLACE_ID))
-                        .toArray(DataPacket[]::new);
-
-                playerPackets.put(player, replaced);
-
-                map.put(entry, playerPackets);
+    @EventHandler
+    public void onServerShutdown(ServerStopEvent e) {
+        List<String> l = SynapseAPI.getInstance().getConfig().getStringList("lobbies");
+        int size = l.size();
+        if (size == 0) {
+            return;
+        }
+        SplittableRandom r = new SplittableRandom();
+        for (Player p : this.getServer().getOnlinePlayers().values()) {
+            if (p instanceof SynapsePlayer) {
+                p.sendMessage("\u00A7cServer went down");
+                ((SynapsePlayer) p).transferByDescription(l.get(size == 1 ? 0 : r.nextInt(size)));
             }
-
-            for (Map.Entry<SynapseEntry, Map<Player, DataPacket[]>> entry : map.entrySet()) {
-                for (Map.Entry<Player, DataPacket[]> playerEntry : entry.getValue().entrySet()) {
-                    for (DataPacket pk : playerEntry.getValue()) {
-                        playerEntry.getKey().dataPacket(pk);
-                    }
-                }
-            }
-        });*/
+        }
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException ignored) {}
     }
 }

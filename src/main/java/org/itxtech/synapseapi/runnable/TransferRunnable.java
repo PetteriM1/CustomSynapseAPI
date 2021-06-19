@@ -8,8 +8,8 @@ import org.itxtech.synapseapi.network.protocol.spp.TransferPacket;
  */
 public class TransferRunnable implements Runnable {
 
-    private SynapsePlayer player;
-    private String hash;
+    private final SynapsePlayer player;
+    private final String hash;
 
     public TransferRunnable(SynapsePlayer player, String hash) {
         this.player = player;

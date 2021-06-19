@@ -29,7 +29,7 @@ public class SynapseAPI extends PluginBase implements Listener {
     private static SynapseAPI instance;
     private final Map<String, SynapseEntry> synapseEntries = new HashMap<>();
     private Messenger messenger;
-    public static boolean playerCountUpdates = false;
+    public static boolean playerCountUpdates;
     public static Map<String, Integer> playerCountData = new ConcurrentHashMap<>();
 
     public static SynapseAPI getInstance() {

@@ -52,13 +52,6 @@ public class SynapsePacketDecoder extends ReplayingDecoder<SynapsePacketDecoder.
         checkpoint(State.HEADER_MAGIC);
     }
 
-    private int checkBodyLength(int bodyLength) throws SynapseContextException {
-        if (bodyLength > 5242880) {
-            throw new SynapseContextException("Body of request is bigger than limit value 5242880");
-        }
-        return bodyLength;
-    }
-
     private void checkMagic(short magic) throws SynapseContextException {
         if (SynapseProtocolHeader.MAGIC != magic) {
             throw new SynapseContextException("Magic value is not equal -17730");

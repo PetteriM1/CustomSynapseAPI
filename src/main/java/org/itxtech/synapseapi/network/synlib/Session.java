@@ -10,7 +10,7 @@ public class Session {
     public Channel channel;
     private String ip;
     private int port;
-    private SynapseClient client;
+    private final SynapseClient client;
     private long lastCheck;
     private boolean connected;
     private long tickUseTime;

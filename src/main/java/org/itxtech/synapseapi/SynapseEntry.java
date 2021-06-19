@@ -35,17 +35,17 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class SynapseEntry {
 
-    private SynapseAPI synapse;
+    private final SynapseAPI synapse;
     private String serverIp;
     private int port;
     private boolean isLobbyServer;
-    private boolean transferOnShutdown;
+    private final boolean transferOnShutdown;
     private String password;
     private SynapseInterface synapseInterface;
     private boolean verified;
     private long lastUpdate;
     private long lastUpdate2;
-    private Map<UUID, SynapsePlayer> players = new HashMap<>();
+    private final Map<UUID, SynapsePlayer> players = new HashMap<>();
     private SynLibInterface synLibInterface;
     private ClientData clientData;
     private String serverDescription;
@@ -206,7 +206,8 @@ public class SynapseEntry {
     }
 
     public class Ticker implements Runnable {
-        private SynapseEntry entry;
+
+        private final SynapseEntry entry;
 
         private Ticker(SynapseEntry entry) {
             this.entry = entry;
@@ -373,8 +374,9 @@ public class SynapseEntry {
     }
 
     private static class RedirectPacketEntry {
-        private SynapsePlayer player;
-        private DataPacket dataPacket;
+
+        private final SynapsePlayer player;
+        private final DataPacket dataPacket;
 
         private RedirectPacketEntry(SynapsePlayer player, DataPacket dataPacket) {
             this.player = player;

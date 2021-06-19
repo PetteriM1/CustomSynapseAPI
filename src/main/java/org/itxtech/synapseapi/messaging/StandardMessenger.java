@@ -47,7 +47,7 @@ public class StandardMessenger implements Messenger {
         if (message.length > 32766) {
             throw new MessageTooLargeException(message);
         }
-        StandardMessenger.validateChannel(channel);
+        validateChannel(channel);
     }
 
     private void addToOutgoing(Plugin plugin, String channel) {
@@ -181,7 +181,7 @@ public class StandardMessenger implements Messenger {
 
     @Override
     public boolean isReservedChannel(String channel) {
-        StandardMessenger.validateChannel(channel);
+        validateChannel(channel);
         return false;
     }
 
@@ -190,7 +190,7 @@ public class StandardMessenger implements Messenger {
         if (plugin == null) {
             throw new IllegalArgumentException("Plugin cannot be null");
         }
-        StandardMessenger.validateChannel(channel);
+        validateChannel(channel);
         if (this.isReservedChannel(channel)) {
             throw new ReservedChannelException(channel);
         }
@@ -202,7 +202,7 @@ public class StandardMessenger implements Messenger {
         if (plugin == null) {
             throw new IllegalArgumentException("Plugin cannot be null");
         }
-        StandardMessenger.validateChannel(channel);
+        validateChannel(channel);
         this.removeFromOutgoing(plugin, channel);
     }
 
@@ -219,7 +219,7 @@ public class StandardMessenger implements Messenger {
         if (plugin == null) {
             throw new IllegalArgumentException("Plugin cannot be null");
         }
-        StandardMessenger.validateChannel(channel);
+        validateChannel(channel);
         if (this.isReservedChannel(channel)) {
             throw new ReservedChannelException(channel);
         }
@@ -239,7 +239,7 @@ public class StandardMessenger implements Messenger {
         if (listener == null) {
             throw new IllegalArgumentException("Listener cannot be null");
         }
-        StandardMessenger.validateChannel(channel);
+        validateChannel(channel);
         this.removeFromIncoming(new PluginMessageListenerRegistration(this, plugin, channel, listener));
     }
 
@@ -248,7 +248,7 @@ public class StandardMessenger implements Messenger {
         if (plugin == null) {
             throw new IllegalArgumentException("Plugin cannot be null");
         }
-        StandardMessenger.validateChannel(channel);
+        validateChannel(channel);
         this.removeFromIncoming(plugin, channel);
     }
 
@@ -328,7 +328,7 @@ public class StandardMessenger implements Messenger {
 
     @Override
     public Set<PluginMessageListenerRegistration> getIncomingChannelRegistrations(String channel) {
-        StandardMessenger.validateChannel(channel);
+        validateChannel(channel);
 
         synchronized (this.incomingLock) {
             Set<PluginMessageListenerRegistration> registrations = this.incomingByChannel.get(channel);
@@ -344,7 +344,7 @@ public class StandardMessenger implements Messenger {
         if (plugin == null) {
             throw new IllegalArgumentException("Plugin cannot be null");
         }
-        StandardMessenger.validateChannel(channel);
+        validateChannel(channel);
 
         synchronized (this.incomingLock) {
             Set<PluginMessageListenerRegistration> registrations = this.incomingByPlugin.get(plugin);
@@ -378,7 +378,7 @@ public class StandardMessenger implements Messenger {
         if (plugin == null) {
             throw new IllegalArgumentException("Plugin cannot be null");
         }
-        StandardMessenger.validateChannel(channel);
+        validateChannel(channel);
 
         synchronized (this.incomingLock) {
             Set<PluginMessageListenerRegistration> registrations = this.incomingByPlugin.get(plugin);
@@ -397,7 +397,7 @@ public class StandardMessenger implements Messenger {
         if (plugin == null) {
             throw new IllegalArgumentException("Plugin cannot be null");
         }
-        StandardMessenger.validateChannel(channel);
+        validateChannel(channel);
 
         synchronized (this.outgoingLock) {
             Set<String> channels = this.outgoingByPlugin.get(plugin);
@@ -410,7 +410,7 @@ public class StandardMessenger implements Messenger {
         if (message == null) {
             throw new IllegalArgumentException("Message cannot be null");
         }
-        StandardMessenger.validateChannel(channel);
+        validateChannel(channel);
         Set<PluginMessageListenerRegistration> registrations = this.getIncomingChannelRegistrations(channel);
         for (PluginMessageListenerRegistration registration : registrations) {
             try {

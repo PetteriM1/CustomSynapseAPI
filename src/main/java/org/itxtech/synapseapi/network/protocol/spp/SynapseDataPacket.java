@@ -5,7 +5,7 @@ import cn.nukkit.utils.BinaryStream;
 
 public abstract class SynapseDataPacket extends BinaryStream implements Cloneable {
 
-    public boolean isEncoded = false;
+    public boolean isEncoded;
 
     public abstract byte pid();
 

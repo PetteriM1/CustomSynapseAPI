@@ -23,7 +23,7 @@ public class SynapseClientHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelActive(final ChannelHandlerContext ctx) {
+    public void channelActive(ChannelHandlerContext ctx) {
         this.getSynapseClient().getSession().channel = ctx.channel();
         InetSocketAddress address = (InetSocketAddress) ctx.channel().remoteAddress();
         this.getSynapseClient().getSession().updateAddress(address);

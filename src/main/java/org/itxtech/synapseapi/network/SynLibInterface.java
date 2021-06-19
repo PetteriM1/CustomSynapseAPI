@@ -13,7 +13,7 @@ import org.itxtech.synapseapi.network.protocol.spp.RedirectPacket;
  */
 public class SynLibInterface implements SourceInterface {
 
-    private SynapseInterface synapseInterface;
+    private final SynapseInterface synapseInterface;
 
     public SynLibInterface(SynapseInterface synapseInterface) {
         this.synapseInterface = synapseInterface;

@@ -14,9 +14,9 @@ import java.util.Map;
 public class SynapseInterface {
 
     private static final Map<Byte, SynapseDataPacket> packetPool = new HashMap<>();
-    private SynapseEntry synapse;
-    private SynapseClient client;
-    private boolean connected = false;
+    private final SynapseEntry synapse;
+    private final SynapseClient client;
+    private boolean connected;
 
     public SynapseInterface(SynapseEntry server, String ip, int port) {
         this.synapse = server;

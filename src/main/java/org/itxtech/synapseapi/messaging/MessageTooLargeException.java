@@ -1,6 +1,5 @@
 package org.itxtech.synapseapi.messaging;
 
-@SuppressWarnings("serial")
 public class MessageTooLargeException extends RuntimeException {
 
     public MessageTooLargeException() {

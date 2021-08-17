@@ -377,6 +377,11 @@ public class SynapsePlayer extends Player {
         }
     }
 
+    @Override
+    public void handleDataPacket(DataPacket packet) {
+        super.handleDataPacket(DataPacketEidReplacer.replace(packet, REPLACE_ID, this.getId()));
+    }
+
     private void sendFullPlayerListInternal(Player player, Map<UUID, Player> playerList) {
         PlayerListPacket pk = new PlayerListPacket();
         pk.type = PlayerListPacket.TYPE_ADD;

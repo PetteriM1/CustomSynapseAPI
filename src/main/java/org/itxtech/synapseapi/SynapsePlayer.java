@@ -5,9 +5,13 @@ import cn.nukkit.AdventureSettings.Type;
 import cn.nukkit.Player;
 import cn.nukkit.PlayerFood;
 import cn.nukkit.Server;
+import cn.nukkit.block.custom.CustomBlockManager;
+import cn.nukkit.entity.custom.EntityManager;
+import cn.nukkit.entity.data.ByteEntityData;
 import cn.nukkit.event.player.*;
 import cn.nukkit.event.server.DataPacketSendEvent;
 import cn.nukkit.item.Item;
+import cn.nukkit.item.custom.CustomItemManager;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Position;
 import cn.nukkit.math.NukkitMath;
@@ -16,6 +20,7 @@ import cn.nukkit.nbt.tag.*;
 import cn.nukkit.network.SourceInterface;
 import cn.nukkit.network.protocol.*;
 import cn.nukkit.network.protocol.types.ContainerIds;
+import cn.nukkit.network.protocol.types.ExperimentData;
 import cn.nukkit.potion.Effect;
 import cn.nukkit.utils.TextFormat;
 import cn.nukkit.utils.Utils;
@@ -85,6 +90,7 @@ public class SynapsePlayer extends Player {
     @Override
     public void handleDataPacket(DataPacket packet) {
         if (this.connectedToCurrentInstance) {
+            this.networkSettingsRequested = true;
             super.handleDataPacket(DataPacketEidReplacer.replaceBack(packet, REPLACE_ID, this.getId()));
         }
     }
@@ -289,7 +295,7 @@ public class SynapsePlayer extends Player {
     @Override
     protected void completeLoginSequence() {
         if (this.loggedIn) {
-            this.server.getLogger().warning("(BUG) Tried to call completeLoginSequence but player is already logged in");
+            this.server.getLogger().warning("Tried to call completeLoginSequence but player is already logged in: " + this.username);
             return;
         }
 
@@ -297,6 +303,10 @@ public class SynapsePlayer extends Player {
         this.server.getPluginManager().callEvent(ev = new PlayerLoginEvent(this, "Plugin reason"));
         if (ev.isCancelled()) {
             this.close(this.getLeaveMessage(), ev.getKickMessage());
+            return;
+        }
+
+        if (this.isClosed() || !this.isConnected()) {
             return;
         }
 
@@ -333,60 +343,66 @@ public class SynapsePlayer extends Player {
                     startGamePacket.lightningLevel = this.getLevel().getThunderTime();
                 }
             }
+
+            if (!CustomBlockManager.get().getBlockDefinitions().isEmpty()) {
+                startGamePacket.experiments.add(new ExperimentData("data_driven_items", true));
+            }
+
             startGamePacket.isMovementServerAuthoritative = this.isMovementServerAuthoritative();
-            this.directDataPacket(startGamePacket);
+            startGamePacket.forceNoServerAuthBlockBreaking = !this.isMovementServerAuthoritative() && this.protocol >= ProtocolInfo.v1_17_0; // Plugin workaround
+            this.forceDataPacket(startGamePacket, null);
         }
 
-        this.noDamageTicks = 100;
         this.loggedIn = true;
 
         String loginMsg = this.getServer().getLanguage().translateString("nukkit.player.logIn",
                 TextFormat.AQUA + this.username + TextFormat.WHITE,
                 this.getAddress(),
                 String.valueOf(this.getPort()));
-        if (server.logJoinLocation) {
-            loginMsg += " (" + level.getName() + ", " + getFloorX() + ", " + getFloorY() + ", " + getFloorZ() + ')';
-        }
+        loginMsg += " (" + level.getName() + ", " + getFloorX() + ", " + getFloorY() + ", " + getFloorZ() + ')';
         this.server.getLogger().info(loginMsg);
 
-        try {
-            if (this.isFirstTimeLogin && this.protocol >= 313) {
-                if (this.protocol >= 361) {
-                    this.dataPacket(new BiomeDefinitionListPacket());
+        {
+            this.setDataFlag(DATA_FLAGS, DATA_FLAG_CAN_CLIMB, true, false);
+            this.setDataFlag(DATA_FLAGS, DATA_FLAG_CAN_SHOW_NAMETAG, true, false);
+            this.setDataProperty(new ByteEntityData(DATA_ALWAYS_SHOW_NAMETAG, 1), false);
+
+            if (this.isSpectator()) {
+                this.setDataFlag(DATA_FLAGS, DATA_FLAG_SILENT, true, false);
+                this.setDataFlag(DATA_FLAGS, DATA_FLAG_HAS_COLLISION, false, false);
+            }
+
+            if (this.isFirstTimeLogin && this.protocol >= ProtocolInfo.v1_8_0) {
+                if (this.protocol >= ProtocolInfo.v1_12_0) {
+                    if (CustomItemManager.get().hasCustomItems() && this.protocol >= ProtocolInfo.v1_16_100) {
+                        this.dataPacket(CustomItemManager.get().getCachedPacket(this.protocol));
+                    }
+                    this.dataPacket(BiomeDefinitionListPacket.getCachedPacket(this.protocol));
                 }
-                this.dataPacket(new AvailableEntityIdentifiersPacket());
+                this.dataPacket(EntityManager.get().getCachedPacket(this.protocol));
             }
 
             this.getLevel().sendTime(this);
 
-            SetDifficultyPacket diffucultyPK = new SetDifficultyPacket();
-            diffucultyPK.difficulty = this.getServer().getDifficulty();
-            this.dataPacket(diffucultyPK);
-            SetCommandsEnabledPacket enableCommandsPK = new SetCommandsEnabledPacket();
-            enableCommandsPK.enabled = this.isEnableClientCommand();
-            this.dataPacket(enableCommandsPK);
+            SetDifficultyPacket difficultyPacket = new SetDifficultyPacket();
+            difficultyPacket.difficulty = this.server.getDifficulty();
+            this.dataPacket(difficultyPacket);
 
-            if (this.isEnableClientCommand()) {
-                this.getServer().getScheduler().scheduleDelayedTask(null, () -> {
-                    if (this.isOnline()) {
-                        this.sendCommandData();
-                    }
-                }, 2);
-            }
+            SetCommandsEnabledPacket commandsPacket = new SetCommandsEnabledPacket();
+            commandsPacket.enabled = this.isEnableClientCommand();
+            this.dataPacket(commandsPacket);
+
             this.adventureSettings.update();
 
             GameRulesChangedPacket gameRulesPK = new GameRulesChangedPacket();
             gameRulesPK.gameRulesMap = level.getGameRules().getGameRules();
             this.dataPacket(gameRulesPK);
 
-            if (this.isFirstTimeLogin) {
-                Map<UUID, Player> tempOnlinePlayers = getServer().getOnlinePlayers();
-                CompletableFuture.runAsync(() -> sendFullPlayerListInternal(tempOnlinePlayers));
-            }
-
+            Map<UUID, Player> tempOnlinePlayers = getServer().getOnlinePlayers();
+            CompletableFuture.runAsync(() -> sendFullPlayerListInternal(tempOnlinePlayers));
             this.sendAttributes();
 
-            if (this.protocol < 407 && this.gamemode == Player.SPECTATOR) {
+            if (this.protocol < ProtocolInfo.v1_16_0 && this.gamemode == Player.SPECTATOR) {
                 InventoryContentPacket inventoryContentPacket = new InventoryContentPacket();
                 inventoryContentPacket.inventoryId = ContainerIds.CREATIVE;
                 this.dataPacket(inventoryContentPacket);
@@ -403,25 +419,23 @@ public class SynapsePlayer extends Player {
                 this.dataPacket(pk);
             }
 
+            if (this.isEnableClientCommand()) {
+                this.sendCommandData();
+            }
+
             this.sendPotionEffects(this);
             this.sendData(this);
-            this.setCanClimb(true);
-            this.setNameTagVisible(true);
-            this.setNameTagAlwaysVisible(true);
 
             if (this.isOp() || this.hasPermission("nukkit.textcolor") || this.server.suomiCraftPEMode()) {
                 this.setRemoveFormat(false);
             }
-        } catch (Exception e) {
-            this.close("", "Internal Server Error");
-            getServer().getLogger().logException(e);
         }
-
-        this.server.addOnlinePlayer(this);
 
         ChunkRadiusUpdatedPacket chunkRadiusUpdatePacket = new ChunkRadiusUpdatedPacket();
         chunkRadiusUpdatePacket.radius = this.chunkRadius;
         this.dataPacket(chunkRadiusUpdatePacket);
+
+        this.server.onPlayerCompleteLoginSequence(this);
 
         if (!this.isFirstTimeLogin) {
             this.doFirstSpawn();
